@@ -56,7 +56,7 @@ body{font-family:var(--hn);background:var(--bg);color:var(--text);min-height:100
 
 /* ===== floating neon 3D shapes (ambient) — outer wrapper floats, inner shape spins ===== */
 .shapes3d{position:fixed;inset:0;z-index:1;pointer-events:none;perspective:900px}
-.shapes3d i{position:absolute;display:block} /* outer: position + float only, no transform conflict */
+.shapes3d i{position:absolute;display:block}
 .shapes3d i b{display:block;width:100%;height:100%;transform-style:preserve-3d;
   border:2px solid var(--edge3d);border-radius:6px;
   background:linear-gradient(135deg,rgba(255,255,255,.06),transparent 60%);
@@ -105,14 +105,14 @@ body{font-family:var(--hn);background:var(--bg);color:var(--text);min-height:100
 @media (prefers-reduced-motion:reduce){.map svg .burstDot,.map svg .burstRing{animation:none!important;opacity:0}}
 
 /* ===== LEADERBOARD ===== */
-.lbBtn{position:fixed;top:16px;right:20px;z-index:85;display:inline-flex;align-items:center;gap:8px;
-  padding:10px 16px;border-radius:999px;border:1px solid rgba(255,199,0,.45);
+.lbBtn{display:inline-flex;align-items:center;gap:7px;
+  padding:8px 13px;border-radius:999px;border:1px solid rgba(255,199,0,.45);
   background:linear-gradient(180deg,rgba(255,199,0,.14),rgba(255,199,0,.04));
-  color:var(--gold);font-family:var(--mono);font-size:12px;letter-spacing:1px;cursor:pointer;
-  box-shadow:0 0 22px rgba(255,199,0,.18);transition:box-shadow .3s,transform .2s}
-.lbBtn:hover{box-shadow:0 0 34px rgba(255,199,0,.4)}
+  color:var(--gold);font-family:var(--mono);font-size:11px;letter-spacing:.5px;cursor:pointer;white-space:nowrap;
+  box-shadow:0 0 16px rgba(255,199,0,.16);transition:box-shadow .3s,transform .2s}
+.lbBtn:hover{box-shadow:0 0 26px rgba(255,199,0,.4)}
 .lbBtn:active{transform:translateY(2px)}
-#lbDrawer{position:fixed;top:0;right:-360px;width:340px;max-width:90vw;height:100%;z-index:95;
+#lbDrawer{position:fixed;top:0;right:-360px;width:340px;max-width:90vw;height:100%;z-index:230;
   background:linear-gradient(180deg,#1D1925,#120E1A);border-left:1px solid rgba(255,199,0,.35);
   box-shadow:-14px 0 50px rgba(0,0,0,.6);transition:right .4s cubic-bezier(.2,.9,.3,1);padding:24px;overflow-y:auto}
 #lbDrawer.open{right:0}
@@ -132,6 +132,29 @@ body{font-family:var(--hn);background:var(--bg);color:var(--text);min-height:100
 #lbClose{margin-top:6px;width:100%;font-family:var(--mono);letter-spacing:1.5px;font-size:11.5px;
   background:transparent;border:1px solid rgba(255,199,0,.4);color:var(--gold);border-radius:8px;padding:10px;cursor:pointer}
 #lbClose:hover{box-shadow:0 0 20px rgba(255,199,0,.3)}
+
+/* ===== AI COACH ===== */
+.coachBtn{display:inline-flex;align-items:center;gap:7px;
+  padding:9px 15px;border-radius:999px;border:none;
+  background:linear-gradient(180deg,#7DF3DC,var(--mint));
+  color:#052A23;font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.5px;cursor:pointer;white-space:nowrap;
+  box-shadow:0 0 22px rgba(79,232,202,.65),0 0 6px rgba(79,232,202,.9);
+  animation:coachPulse 2.4s ease-in-out infinite;transition:box-shadow .2s,transform .2s}
+.coachBtn:hover{box-shadow:0 0 32px rgba(79,232,202,.9),0 0 8px rgba(79,232,202,1)}
+.coachBtn:active{transform:translateY(2px)}
+@keyframes coachPulse{0%,100%{box-shadow:0 0 22px rgba(79,232,202,.65),0 0 6px rgba(79,232,202,.9)}
+  50%{box-shadow:0 0 32px rgba(79,232,202,.9),0 0 10px rgba(79,232,202,1)}}
+@media (prefers-reduced-motion:reduce){.coachBtn{animation:none}}
+#coachDrawer{position:fixed;top:0;right:-360px;width:340px;max-width:90vw;height:100%;z-index:230;
+  background:linear-gradient(180deg,#1D1925,#120E1A);border-left:1px solid rgba(79,232,202,.35);
+  box-shadow:-14px 0 50px rgba(0,0,0,.6);transition:right .4s cubic-bezier(.2,.9,.3,1);padding:24px;overflow-y:auto}
+#coachDrawer.open{right:0}
+#coachDrawer h3{font-family:var(--mono);font-weight:700;letter-spacing:2.5px;font-size:15px;color:var(--mint);
+  text-shadow:0 0 14px rgba(79,232,202,.5);margin-bottom:5px}
+#coachDrawer textarea{background:rgba(0,0,0,.4)}
+#coachClose{margin-top:10px;width:100%;font-family:var(--mono);letter-spacing:1.5px;font-size:11.5px;
+  background:transparent;border:1px solid rgba(79,232,202,.4);color:var(--mint);border-radius:8px;padding:10px;cursor:pointer}
+#coachClose:hover{box-shadow:0 0 20px rgba(79,232,202,.3)}
 
 
 /* ===== HUD ===== */
@@ -199,8 +222,10 @@ h1 em{font-style:normal;color:var(--pink);text-shadow:0 0 30px rgba(255,43,122,.
 .stageViewer.show{display:block}
 .stageViewer .stage{display:none;max-width:900px;margin-left:auto;margin-right:auto}
 .stageViewer .stage.current{display:block}
-.viewerHead{position:relative;z-index:201;display:flex;align-items:center;justify-content:space-between;
-  gap:12px;max-width:900px;margin:0 auto 18px}
+.viewerHead{position:relative;z-index:201;display:flex;align-items:center;gap:10px;
+  max-width:900px;margin:0 auto 18px}
+.viewerHead .prog{margin-left:auto}
+.lbBtnSmall,.coachBtnSmall{padding:8px 11px;font-size:14px}
 .backBtn{display:inline-flex;align-items:center;gap:8px;
   background:none;border:1px solid var(--line);color:var(--dim);border-radius:10px;padding:10px 16px;
   font-family:var(--mono);font-size:13px;cursor:pointer;transition:border-color .2s,color .2s}
@@ -290,7 +315,7 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
 .summit p{color:var(--dim);font-size:14px;max-width:46ch;margin:0 auto 16px;line-height:1.5}
 
 /* ===== peers button ===== */
-.peers{position:fixed;left:20px;bottom:22px;z-index:85;display:inline-flex;align-items:center;gap:9px;
+.peers{position:fixed;left:20px;bottom:22px;z-index:220;display:inline-flex;align-items:center;gap:9px;
   padding:12px 17px;border-radius:99px;cursor:pointer;border:1px solid rgba(229,124,250,.5);
   background:rgba(38,31,52,.9);backdrop-filter:blur(12px);color:var(--text);
   font-family:var(--hn);font-size:13px;font-weight:700;box-shadow:0 0 26px rgba(229,124,250,.3);
@@ -300,7 +325,7 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
 .peers em{font-style:normal;width:8px;height:8px;border-radius:50%;background:var(--mint);
   box-shadow:0 0 12px var(--mint)}
 
-.toasts{position:fixed;right:20px;bottom:22px;z-index:90;display:flex;flex-direction:column;gap:9px}
+.toasts{position:fixed;right:20px;bottom:22px;z-index:225;display:flex;flex-direction:column;gap:9px}
 .toast{padding:12px 18px;border-radius:11px;font-weight:700;font-size:12.5px;font-family:var(--mono);
   text-transform:uppercase;letter-spacing:.1em;
   background:linear-gradient(180deg,rgba(255,43,122,.96),rgba(206,0,88,.96));
@@ -332,8 +357,10 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
   <div class="stat"><u>Altitude</u><b id="hXp" class="p">0 XP</b></div>
   <div class="stat"><u>Checkpoint</u><b id="hStep">0/5</b></div>
   <div class="bar"><i id="hBar"></i></div>
+  <button class="lbBtn" id="lbBtn">🏆 Leaderboard</button>
+  <button class="coachBtn" id="coachBtn">🤖 AI Coach</button>
   <div class="me">
-    <div class="who"><b id="meName">—</b><span id="meMail">signed in</span></div>
+    <div class="who"><b id="meName">—</b></div>
     <div class="av" id="meAv">—</div>
   </div>
 </header>
@@ -361,6 +388,8 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
     <div class="viewerHead">
       <button id="backToRoute" class="backBtn">← Back to route</button>
       <span class="prog" id="viewerProg"></span>
+      <button class="lbBtn lbBtnSmall">🏆</button>
+      <button class="coachBtn coachBtnSmall">🤖</button>
     </div>
   <section class="stage on open current" id="s1">
     <div class="sh"><div class="node">01</div>
@@ -443,33 +472,19 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
 
   <section class="stage locked" id="s5">
     <div class="sh"><div class="node">05</div>
-      <div><h3>Solo ascent</h3><p>Apply it to real work, then report back from the field</p></div>
+      <div><h3>Solo ascent</h3><p>Apply it to real work</p></div>
       <span class="tag">Mission</span></div>
     <div class="body">
       <div class="panel" id="applyPanel">
         <h5>Apply — before you set off</h5>
+        <p class="edge" style="margin:-4px 0 12px">All three are optional — write as much or as little as you like, and you can come back and edit any time.</p>
         <label class="q"><i>01</i>What's one thing from the climb you can use in your work this week — and which task will you try it on?</label>
-        <textarea rows="2" data-f="a1"></textarea>
+        <textarea rows="2" data-f="a1" placeholder="Type your answer here..."></textarea>
         <label class="q"><i>02</i>What will you make from it — a prompt you can reuse, a draft, a checklist?</label>
-        <textarea rows="2" data-f="a2"></textarea>
+        <textarea rows="2" data-f="a2" placeholder="Type your answer here..."></textarea>
         <label class="q"><i>03</i>How will you know it worked?</label>
-        <textarea rows="2" data-f="a3"></textarea>
-        <div class="acts"><button class="btn" id="applyGo">Save and set off</button></div>
-      </div>
-      <div class="callout" id="comeBack">
-        <b>Plan logged. Now go and try it.</b>
-        <p>Put it to work on the task you named. When you've had a go — even a half-finished one — come back here and tell us how it went. Your progress is saved, so you can close this page.</p>
-        <div class="acts"><button class="btn mint" id="openReflect">I've tried it — open my reflection</button></div>
-      </div>
-      <div class="panel dim" id="reflectPanel">
-        <h5>Reflect — locked until you've applied it</h5>
-        <div id="reflectQs" class="hide">
-          <label class="q"><i>01</i>What did you actually try, and what did you create or change?</label>
-          <textarea rows="2" data-f="r1" placeholder="Half-finished counts."></textarea>
-          <label class="q"><i>02</i>What worked, where did you get stuck, and what would you try next?</label>
-          <textarea rows="2" data-f="r2"></textarea>
-          <div class="acts"><button class="btn gold" data-next="5">Log my ascent</button></div>
-        </div>
+        <textarea rows="2" data-f="a3" placeholder="Type your answer here..."></textarea>
+        <div class="acts"><button class="btn" id="applyGo">Save and continue</button></div>
       </div>
     </div>
   </section>
@@ -486,10 +501,33 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
         <div class="meta"><em>Optional — go further</em><b>Generative AI for Workflow Automation</b>
           <span>Edureka · ~11 hrs · build and measure real GenAI workflows — Zapier, n8n, APIs, agents</span></div>
         <div class="acts"><a class="btn crs" data-ev="open-opt" target="_blank" rel="noopener" href="https://www.coursera.org/learn/generative-ai-workflow-automation">Open</a></div></div>
+      <div class="acts" style="margin-top:14px"><button class="btn" data-next="6">Continue to reflection</button></div>
     </div>
   </section>
 
   <section class="stage locked" id="s7">
+    <div class="sh"><div class="node">✎</div>
+      <div><h3>Reflect</h3><p>How did it go once you tried it for real?</p></div>
+      <span class="tag">Optional</span></div>
+    <div class="body">
+      <div class="panel" id="reflectPanel">
+        <h5>Reflect — whenever you've had a go</h5>
+        <p class="edge" style="margin:-4px 0 12px">Both are optional — half-finished counts. You can save now and edit later.</p>
+        <label class="q"><i>01</i>What did you actually try, and what did you create or change?</label>
+        <textarea rows="2" data-f="r1" placeholder="Type your answer here..."></textarea>
+        <label class="q"><i>02</i>What worked, where did you get stuck, and what would you try next?</label>
+        <textarea rows="2" data-f="r2" placeholder="Type your answer here..."></textarea>
+        <div class="acts">
+          <button class="btn gold" data-next="7">Log my reflection</button>
+          <button class="btn ghost" id="reflectSkip">Skip for now — I'll reflect later</button>
+        </div>
+        <p class="edge" id="reflectSkipNote" style="display:none;margin-top:8px">
+          An email draft to bu.learning@betterup.co is ready in your mail app — send it whenever, no rush.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stage locked" id="s8">
     <div class="sh"><div class="node">✉</div>
       <div><h3>Enrol in Running with Claude</h3><p>One click — your completion is logged and your enrolment for the next climb is requested</p></div>
       <span class="tag">30 sec</span></div>
@@ -503,7 +541,15 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
 
 
 <button class="peers" id="peersBtn"><em></em> Ask your peers</button>
-<button class="lbBtn" id="lbBtn">🏆 Leaderboard</button>
+<div id="coachDrawer" aria-hidden="true">
+  <h3>🤖 ASK YOUR AI COACH</h3>
+  <p class="lbnote">Stuck on anything in this program? Write your question below, then take it to your own Claude — this doesn't send it anywhere, it just helps you frame it clearly.</p>
+  <textarea id="coachQ" rows="4" placeholder="e.g. I'm not sure what my RANGE score actually means, or how to write a prompt for my own work..."></textarea>
+  <button class="btn" id="coachCopy">Copy question for Claude</button>
+  <a class="btn ghost" id="coachOpen" href="https://claude.ai" target="_blank" rel="noopener" style="margin-top:9px;width:100%;justify-content:center;text-decoration:none">Open Claude ↗</a>
+  <p class="edge" style="margin-top:10px">Paste it in, ask away, and come back here anytime — your progress is saved.</p>
+  <button id="coachClose">Close</button>
+</div>
 <div id="lbDrawer" aria-hidden="true">
   <h3>🏆 CLIMBER RANKINGS</h3>
   <p class="lbnote">Top climbers across Expand Your Range, by altitude (XP). Your name is visible to fellow climbers once you've made progress.</p>
@@ -517,13 +563,14 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
    WIRING FOR APPS SCRIPT — set API to your /exec URL when deployed.
    Leave null to run standalone (progress saved in this browser only).
    =================================================================== */
-const API=null; // paste your deployed Apps Script /exec URL here once live
+const API='https://script.google.com/macros/s/AKfycbwhQ2-lyLIVj--aVVCW3OSHVDc1-N08f02NyLoSZak-bvzYSGx5PUXFyjvsJEgRlm2zmQ/exec';
+const GAME='expand-your-range'; // routes data to the "EYR — …" tabs in the shared sheet
 function whoAmI(){
   try{const saved=JSON.parse(localStorage.getItem('eyr:whoami')||'null');
     if(saved&&saved.email&&saved.name)return saved;}catch(e){}
   if(window.BU_USER&&window.BU_USER.email)
     return {name:window.BU_USER.name||window.BU_USER.email.split('@')[0],email:window.BU_USER.email};
-  const nRaw=prompt('Welcome to Expand Your Range — what’s your name?');
+  const nRaw=prompt('Welcome to Expand Your Range \u2014 what\u2019s your name?');
   const name=(nRaw||'').trim()||'Guest';
   const eRaw=prompt('And your BetterUp email address?');
   let email=(eRaw||'').trim();
@@ -553,7 +600,6 @@ const USER={name:ME.name,email:ME.email};
     .replace(/\b\w/g,c=>c.toUpperCase());
   const ini=name.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase()||'BU';
   document.getElementById('meName').textContent=name;
-  document.getElementById('meMail').textContent=mail;
   document.getElementById('meAv').textContent=ini;
 })();
 
@@ -590,7 +636,7 @@ function flush(){
 function post(action,payload){
   try{
     fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify(Object.assign({action:action,email:USER.email,name:USER.name,session:SESSION},payload))});
+      body:JSON.stringify(Object.assign({action:action,game:GAME,email:USER.email,name:USER.name,session:SESSION},payload))});
   }catch(e){}
 }
 setInterval(()=>{const n=Date.now();
@@ -605,7 +651,7 @@ document.addEventListener('click',e=>{
 },true);
 
 /* ---------- ui ---------- */
-const XP={1:100,2:150,3:400,4:200,5:350};
+const XP={1:100,2:150,3:400,4:200,5:350,6:200,7:150,8:100};
 const DIMS=[['Reach','R'],['Autonomy','A'],['Navigation','N'],['Generalization','G'],['Execution','EF']];
 const PTS=[[92,268],[268,214],[430,178],[598,132],[730,96],[832,52]];
 const SEG=[
@@ -690,8 +736,6 @@ function drawMap(){
     <circle cx="-1" cy="-22" r="3.4" fill="#F4F3E9"/>
     <path d="M-1,-19 L-1,-9 M-1,-16 L-6,-12 M-1,-16 L4,-13 M-1,-9 L-5,-2 M-1,-9 L3,-2"
       stroke="#F4F3E9" stroke-width="1.7" stroke-linecap="round" fill="none"/></g></g>`;
-  if(flag)h+=`<text x="${cp[0]}" y="${cp[1]-40}" text-anchor="middle" font-family="Roboto Mono,monospace"
-    font-size="9" letter-spacing="1.8" fill="#FFC700">SUMMIT</text>`;
   const svg=document.getElementById('mapSvg');svg.innerHTML=h;
   svg.querySelectorAll('.pin').forEach(p=>p.addEventListener('click',()=>{
     const id='s'+p.dataset.go, el=document.getElementById(id);
@@ -730,26 +774,16 @@ function advance(id,silent){
   el.classList.remove('on');el.classList.add('done');if(!silent)el.classList.remove('open');
   const nx=document.getElementById('s'+(id+1));
   if(nx){nx.classList.remove('locked');nx.classList.add('on');} /* unlocked, not auto-opened — reach it via the route */
-  if(id===5){if(!already)S.cleared[6]=1;
-    if(nx&&!silent){
-      document.querySelectorAll('.stage.current').forEach(st=>st.classList.remove('current'));
-      nx.classList.add('open');nx.classList.add('current'); /* summit itself — finale, shown immediately alongside enrol */
-      document.getElementById('stageViewer').classList.add('show');
-      const vprog=document.getElementById('viewerProg');if(vprog)vprog.textContent='SUMMIT';
-    }
-    const s7=document.getElementById('s7');
-    if(s7){s7.classList.remove('locked');s7.classList.add('on');if(!silent){s7.classList.add('open');s7.classList.add('current');}}
-    if(!silent&&!already)toast('Summit reached',1);}
+  if(id===6&&!silent&&!already)toast('Summit reached',1); /* Summit is now its own step */
   refresh();save();
-  if(!silent&&!already){burstAt(id-1);if(id===5)setTimeout(()=>burstAt(5),350);}
-  if(!silent&&id!==5){
-    if(nx)setTimeout(()=>openOnly('s'+(id+1)),240); /* proceed straight to the next checkpoint — Back to route stays available */
-    if(!already)toast('Next checkpoint unlocked',2);}
+  if(!silent&&!already)burstAt(Math.min(id-1,5));
+  if(!silent){
+    if(nx)setTimeout(()=>openOnly('s'+(id+1)),240); /* every step flows straight into the next */
+    if(!already&&id<6)toast('Next checkpoint unlocked',2);}
 }
 document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',()=>{
-  if(+b.dataset.next===5){ev('reflect-saved','',JSON.stringify({r1:S.fields.r1||'',r2:S.fields.r2||''}));flush();}
   advance(+b.dataset.next);}));
-const STAGE_LABEL={s1:'HOME',s2:'02',s3:'03',s4:'04',s5:'05',s6:'SUMMIT',s7:'SUMMIT'};
+const STAGE_LABEL={s1:'HOME',s2:'02',s3:'03',s4:'04',s5:'05',s6:'SUMMIT',s7:'REFLECT',s8:'ENROL'};
 function openOnly(id){
   document.querySelectorAll('.stage.open').forEach(s=>{if(s.id!==id)s.classList.remove('open');});
   document.querySelectorAll('.stage.current').forEach(s=>{if(s.id!==id)s.classList.remove('current');});
@@ -789,21 +823,21 @@ document.querySelectorAll('[data-course]').forEach(b=>b.addEventListener('click'
 /* ---------- certificate sharing (optional, pride not pressure) ---------- */
 function enableShare(k){const c=document.getElementById(k);if(!c)return;
   c.classList.add('ready');const b=c.querySelector('[data-share]');b.disabled=false;
-  if(S.shares[k]){c.classList.add('shared');b.textContent='Shared ✓ — share again';}
+  if(S.shares[k]){c.classList.add('shared');b.textContent='Shared \u2713 \u2014 share again';}
   maybeGlow(k);}
 function maybeGlow(k){
   const course=k==='sh1'?'c1':'c2';const card=document.getElementById(k);
   if(card&&S.courses[course]&&S.opened[course])card.classList.add('rainbow');}
 function shareCert(k,course){
   const name=document.getElementById('meName').textContent;
-  const su='Milestone: my Coursera certificate — '+course;
-  const body='Hi,\n\nI’ve just earned my certificate for “'+course+'” as part of the Expand Your Range programme at BetterUp — wanted to share the milestone with you.\n\nCertificate attached / linked.\n\n'+name;
+  const su='Milestone: my Coursera certificate \u2014 '+course;
+  const body='Hi,\n\nI\u2019ve just earned my certificate for \u201c'+course+'\u201d as part of the Expand Your Range programme at BetterUp \u2014 wanted to share the milestone with you.\n\nCertificate attached / linked.\n\n'+name;
   window.open('https://mail.google.com/mail/?view=cm&fs=1'
     +'&cc='+encodeURIComponent('bu.learning@betterup.co')
     +'&su='+encodeURIComponent(su)
     +'&body='+encodeURIComponent(body),'_blank');
   S.shares[k]=1;const c=document.getElementById(k);c.classList.add('shared');
-  const b=c.querySelector('[data-share]');b.textContent='Shared ✓ — share again';
+  const b=c.querySelector('[data-share]');b.textContent='Shared \u2713 \u2014 share again';
   ping(760);addXp(40);ev('cert-share',k,course);flush();save();
 }
 document.querySelectorAll('[data-share]').forEach(b=>b.addEventListener('click',()=>shareCert(b.dataset.share,b.dataset.cn.replace(/&amp;/g,'&'))));
@@ -819,24 +853,28 @@ document.querySelectorAll('[data-f]').forEach(t=>{
 });
 
 function doApply(silent){
+  /* Apply is optional AND always editable — learners can come back and add
+     or change their answers at any time; every save re-sends the latest text */
   S.applied=true;
   const p=document.getElementById('applyPanel');
-  p.querySelectorAll('textarea').forEach(t=>t.disabled=true);
-  document.getElementById('applyGo').disabled=true;
-  p.querySelector('h5').textContent='Apply — logged';
-  document.getElementById('comeBack').classList.add('show');
-  if(!silent){ping(700);addXp(150);ev('apply-saved','',JSON.stringify({a1:S.fields.a1||'',a2:S.fields.a2||'',a3:S.fields.a3||''}));flush();toast('Plan logged — go and try it',2);
-    setTimeout(()=>document.getElementById('comeBack').scrollIntoView({behavior:'smooth',block:'center'}),200);}
+  if(p){const h=p.querySelector('h5');if(h)h.textContent='Apply — saved (you can edit and save again)';}
+  const g=document.getElementById('applyGo');if(g)g.textContent='Save again';
+  if(!silent){ping(700);
+    if(!S.applyXp){addXp(150);S.applyXp=1;}   /* XP once, saving still allowed forever */
+    ev('apply-saved','',JSON.stringify({a1:S.fields.a1||'',a2:S.fields.a2||'',a3:S.fields.a3||''}));flush();
+    toast('Plan saved',2);}
   save();
 }
 function doReflect(silent){
+  /* Reflect stays editable too — people genuinely come back after trying things */
   S.reflectOpen=true;
   const p=document.getElementById('reflectPanel');
-  p.classList.remove('dim');p.querySelector('h5').textContent='Reflect — how did it go?';
-  document.getElementById('reflectQs').classList.remove('hide');
-  document.getElementById('openReflect').disabled=true;
-  if(!silent){ping(640);ev('reflect-opened');
-    setTimeout(()=>p.scrollIntoView({behavior:'smooth',block:'center'}),180);}
+  if(p){const h=p.querySelector('h5');if(h)h.textContent='Reflect — saved (you can edit and save again)';}
+  document.querySelectorAll('#reflectPanel [data-next="7"]').forEach(b=>b.textContent='Save again');
+  if(!silent){ping(640);
+    if(!S.reflectXp){addXp(150);S.reflectXp=1;}
+    ev('reflect-saved','',JSON.stringify({r1:S.fields.r1||'',r2:S.fields.r2||''}));flush();
+    toast('Reflection saved',2);}
   save();
 }
 function doMail(silent){
@@ -858,8 +896,25 @@ document.getElementById('doneMail').addEventListener('click',()=>{
     +'&body='+encodeURIComponent(body);
   doMail();
 });
-document.getElementById('applyGo').addEventListener('click',()=>doApply());
-document.getElementById('openReflect').addEventListener('click',()=>doReflect());
+document.getElementById('applyGo').addEventListener('click',()=>{doApply();advance(5);});
+/* Log my reflection — records answers (blank is fine) then advances */
+document.querySelectorAll('#reflectPanel [data-next="7"]').forEach(b=>b.addEventListener('click',()=>doReflect()));
+/* Skip is only allowed via an email to BU Learning saying you'll reflect later */
+const rs=document.getElementById('reflectSkip');
+if(rs)rs.addEventListener('click',()=>{
+  const name=document.getElementById('meName').textContent;
+  const body='Hi BU Learning,\n\nI\u2019ve reached the Summit of Expand Your Range but I\u2019d like to complete my reflection later.\n\nName: '+name
+    +'\nDate: '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})
+    +'\n\nI\u2019ll come back and log my reflection once I\u2019ve had a proper go at applying it.\n';
+  window.location.href='mailto:bu.learning@betterup.co'
+    +'?subject='+encodeURIComponent('Expand Your Range — I\u2019ll reflect later')
+    +'&body='+encodeURIComponent(body);
+  S.reflectDeferred=true;
+  const note=document.getElementById('reflectSkipNote');if(note)note.style.display='block';
+  ping(500);ev('reflect-deferred');flush();toast('Email drafted — reflect whenever you\u2019re ready',2);
+  save();
+  setTimeout(()=>advance(7),600); /* still unlocks what comes next */
+});
 
 document.getElementById('pCopy').addEventListener('click',async()=>{ping(500);
   try{await navigator.clipboard.writeText(document.getElementById('pTxt').textContent);
@@ -910,7 +965,7 @@ function peers(){ping(460);ev('peers-click');
 async function fetchLeaderboard(){
   if(!API)return null;
   try{
-    const res=await fetch(API+'?action=leaderboard',{method:'GET'});
+    const res=await fetch(API+'?action=leaderboard&game='+encodeURIComponent(GAME),{method:'GET'});
     if(!res.ok)return null;
     const data=await res.json();
     return Array.isArray(data)?data:null;
@@ -933,10 +988,25 @@ async function renderLeaderboard(){
     list.appendChild(d);
   });
 }
-document.getElementById('lbBtn').addEventListener('click',()=>{
-  renderLeaderboard();document.getElementById('lbDrawer').classList.add('open');ev('leaderboard-open');});
+document.querySelectorAll('.lbBtn').forEach(b=>b.addEventListener('click',()=>{
+  renderLeaderboard();document.getElementById('lbDrawer').classList.add('open');ev('leaderboard-open');}));
 document.getElementById('lbClose').addEventListener('click',()=>
   document.getElementById('lbDrawer').classList.remove('open'));
+
+/* ---------- AI coach (copy-and-open — no API key, no cost, same pattern as the RANGE evaluator) ---------- */
+document.querySelectorAll('.coachBtn').forEach(b=>b.addEventListener('click',()=>{
+  document.getElementById('coachDrawer').classList.add('open');ev('coach-open');}));
+document.getElementById('coachClose').addEventListener('click',()=>
+  document.getElementById('coachDrawer').classList.remove('open'));
+document.getElementById('coachCopy').addEventListener('click',async()=>{
+  const q=document.getElementById('coachQ').value.trim();
+  if(!q){toast('Write your question first');return;}
+  const prompt='I\'m working through BetterUp\'s Expand Your Range AI upskilling program and got stuck on this:\n\n'+q
+    +'\n\nCan you help me understand it and suggest what to try next?';
+  try{await navigator.clipboard.writeText(prompt);toast('Copied — paste it in Claude',2);}
+  catch(e){toast('Select and copy manually');}
+  ev('coach-question','',q.slice(0,80));
+});
 
 document.getElementById('peersBtn').addEventListener('click',peers);
 document.getElementById('slackLink').addEventListener('click',e=>{e.preventDefault();peers();});
