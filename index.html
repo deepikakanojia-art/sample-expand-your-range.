@@ -379,7 +379,7 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
   
 
   <p class="foot">
-    Stuck or curious? <a href="#" id="slackLink">Ask your peers in Slack</a> — channel link coming.<br>
+    Stuck or curious? <a href="https://betterup.enterprise.slack.com/archives/C0BUVGZHFR6" id="slackLink" target="_blank" rel="noopener">Ask your peers in Slack</a>.<br>
     Built by BU L&amp;D. Suggestions or questions: <a href="mailto:bu.learning@betterup.co">bu.learning@betterup.co</a>
     <span class="mono">We track progress and page activity to improve the programme</span>
   </p>
@@ -958,7 +958,7 @@ document.getElementById('scoreGo').addEventListener('click',()=>{
 });
 
 /* ---------- peers ---------- */
-const SLACK='';   // paste the #ai-upskilling link here once the channel exists
+const SLACK='https://betterup.enterprise.slack.com/archives/C0BUVGZHFR6';
 function peers(){ping(460);ev('peers-click');
   if(SLACK){window.open(SLACK,'_blank');}else{toast('Slack channel coming soon');}}
 /* ---------- leaderboard ---------- */
