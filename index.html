@@ -580,7 +580,7 @@ function whoAmI(){
   return who;
 }
 const ME=whoAmI();
-const USER={name:ME.name,email:ME.email};
+const USER={name:ME.name,email:String(ME.email||'').toLowerCase()}; /* normalized once here so KEY, isMe and backend rows all agree on casing — same identity rule as the sister sites */
 
 /* ---------- snow ---------- */
 (function(){let h='';for(let i=0;i<34;i++){
@@ -610,33 +610,40 @@ function ping(){}
 /* ---------- state + persistence ---------- */
 const KEY='eyr:'+USER.email;
 const S={xp:0,cleared:{},courses:{},range:null,fields:{},applied:false,reflectOpen:false,mailed:false,shares:{},opened:{}};
+let RESTORING=false; /* true only while restore() replays already-persisted state through these same code paths to rebuild the UI on load */
 function save(){
   try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
-  if(API)post('save',{state:S});
+  if(API&&!RESTORING)post('save',{state:S}); /* skip re-POSTing during restore's replay — nothing changed, so don't fire a burst of overlapping unsequenced requests each holding a different partial snapshot */
 }
 function load(){
-  try{const r=localStorage.getItem(KEY);if(r)Object.assign(S,JSON.parse(r));}catch(e){}
+  try{let r=localStorage.getItem(KEY);
+    if(!r&&ME.email&&ME.email!==USER.email)r=localStorage.getItem('eyr:'+ME.email); /* migrate progress saved under the pre-normalization mixed-case key so it isn't orphaned */
+    if(r)Object.assign(S,JSON.parse(r));}catch(e){}
 }
 
 /* ---------- analytics ---------- */
 const SESSION=Math.random().toString(36).slice(2,10);
-const T0=Date.now();let visible=0,lastTick=Date.now(),queue=[];
+let visible=0,lastTick=Date.now(),queue=[]; /* removed unused T0 — nothing ever read it */
 function ev(type,target,extra){
   queue.push({email:USER.email,name:USER.name,session:SESSION,ts:new Date().toISOString(),
     type:type,target:target||'',step:Object.keys(S.cleared).length,
     secs:Math.round(visible/1000),extra:extra||''});
   if(queue.length>=12)flush();
 }
-function flush(){
+function flush(useBeacon){
   if(!queue.length)return;
   const batch=queue.slice();queue=[];
   if(!API)return; /* no API configured yet — queue is silently dropped, nothing logged to console */
-  post('events',{events:batch});
+  post('events',{events:batch},useBeacon);
 }
-function post(action,payload){
+function post(action,payload,useBeacon){
+  const body=JSON.stringify(Object.assign({action:action,game:GAME,email:USER.email,name:USER.name,session:SESSION},payload));
+  if(useBeacon&&navigator.sendBeacon){ /* fetch() is routinely cancelled once page unload begins — sendBeacon is built to survive it */
+    try{if(navigator.sendBeacon(API,new Blob([body],{type:'text/plain;charset=utf-8'})))return;}catch(e){}
+  }
   try{
-    fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body:JSON.stringify(Object.assign({action:action,game:GAME,email:USER.email,name:USER.name,session:SESSION},payload))});
+    fetch(API,{method:'POST',keepalive:true,headers:{'Content-Type':'text/plain;charset=utf-8'},body:body})
+      .catch(function(e){}); /* keepalive lets a request issued near tab-close/refresh survive page teardown (same fix as the sister sites); the .catch keeps real network failures from surfacing as an unhandled promise rejection */
   }catch(e){}
 }
 setInterval(()=>{const n=Date.now();
@@ -644,7 +651,7 @@ setInterval(()=>{const n=Date.now();
 setInterval(flush,20000);
 document.addEventListener('visibilitychange',()=>{
   ev(document.visibilityState==='visible'?'focus':'blur');if(document.visibilityState!=='visible')flush();});
-window.addEventListener('beforeunload',()=>{ev('session-end','',Math.round(visible/1000));flush();});
+window.addEventListener('beforeunload',()=>{ev('session-end','',Math.round(visible/1000));save();flush(true);}); /* save() persists typed-but-unblurred field text (S.fields is updated on every keystroke) synchronously to localStorage, so a close/refresh before blur doesn't lose it — same fix as the sister sites */
 document.addEventListener('click',e=>{
   const b=e.target.closest('button,a');if(!b)return;
   ev('click',b.dataset.ev||b.dataset.next||b.dataset.course||b.id||b.textContent.trim().slice(0,32));
@@ -771,7 +778,7 @@ function advance(id,silent){
   const already=!!S.cleared[id]; /* revisiting an already-cleared checkpoint: still navigate forward, just skip the first-time celebration */
   if(!already){S.cleared[id]=1;if(!silent){ping(680);addXp(XP[id]||200);ev('clear','stage-'+id);}}
   const el=document.getElementById('s'+id);
-  el.classList.remove('on');el.classList.add('done');if(!silent)el.classList.remove('open');
+  if(el){el.classList.remove('on');el.classList.add('done');if(!silent)el.classList.remove('open');}
   const nx=document.getElementById('s'+(id+1));
   if(nx){nx.classList.remove('locked');nx.classList.add('on');} /* unlocked, not auto-opened — reach it via the route */
   if(id===6&&!silent&&!already)toast('Summit reached',1); /* Summit is now its own step */
@@ -836,9 +843,10 @@ function shareCert(k,course){
     +'&cc='+encodeURIComponent('bu.learning@betterup.co')
     +'&su='+encodeURIComponent(su)
     +'&body='+encodeURIComponent(body),'_blank');
+  const firstShare=!S.shares[k]; /* re-sharing is allowed, but the XP is a one-time milestone per card */
   S.shares[k]=1;const c=document.getElementById(k);c.classList.add('shared');
   const b=c.querySelector('[data-share]');b.textContent='Shared \u2713 \u2014 share again';
-  ping(760);addXp(40);ev('cert-share',k,course);flush();save();
+  ping(760);if(firstShare)addXp(40);ev('cert-share',k,course);flush();save();
 }
 document.querySelectorAll('[data-share]').forEach(b=>b.addEventListener('click',()=>shareCert(b.dataset.share,b.dataset.cn.replace(/&amp;/g,'&'))));
 document.getElementById('c1open').addEventListener('click',()=>{S.opened.c1=1;maybeGlow('sh1');save();});
@@ -951,7 +959,8 @@ function drawChart(v){
 document.getElementById('scoreGo').addEventListener('click',()=>{
   const raw=document.getElementById('scoreIn').value,v=parse(raw),e=document.getElementById('scoreErr');
   if(!v){e.style.display='block';ping(200);ev('range-parse-fail');return;}
-  e.style.display='none';S.range=Object.assign({},v,{raw:raw.trim(),Total:v.R+v.A+v.N+v.G+v.EF});drawChart(v);addXp(100);
+  e.style.display='none';S.range=Object.assign({},v,{raw:raw.trim(),Total:v.R+v.A+v.N+v.G+v.EF});drawChart(v);
+  if(!S.rangeXp){addXp(100);S.rangeXp=1;} /* re-plotting (e.g. to see your shift later) shouldn't re-award XP every time */
   document.getElementById('scoreGo').textContent='Re-plot';
   ev('range-saved','',JSON.stringify(v));toast('Terrain mapped',2);save();
   setTimeout(()=>document.getElementById('chartWrap').scrollIntoView({behavior:'smooth',block:'center'}),160);
@@ -971,22 +980,41 @@ async function fetchLeaderboard(){
     return Array.isArray(data)?data:null;
   }catch(e){return null;}
 }
+function isMe(r){return r.email?String(r.email).toLowerCase()===USER.email:r.name===USER.name;} /* case-insensitive so an already-stored mixed-case backend row still matches (USER.email is pre-lowercased) */
+function lbRowHtml(r,extraClass){
+  return '<div class="lbrow'+(isMe(r)?' me':'')+(extraClass?' '+extraClass:'')+'">'
+    +'<span class="rank">'+String(r.rank).padStart(2,'0')+'</span>'
+    +'<span class="nm">'+String(r.name||'').replace(/[<>&]/g,'')+'</span>'
+    +'<span class="pts">'+(+r.xp||0)+' XP</span></div>'; /* coerce xp to a number — backend rows are untrusted JSON and this lands in innerHTML (same fix as the sister sites) */
+}
+let lbSeq=0;
 async function renderLeaderboard(){
+  const seq=++lbSeq; /* guards against an overlapping earlier call's response landing after this one and clobbering the list */
   const list=document.getElementById('lbList');list.innerHTML='';
   let rows=await fetchLeaderboard();
-  if(!rows||!rows.length){
+  if(seq!==lbSeq)return; /* a newer render started while this fetch was in flight — only the latest click gets to draw */
+  const isFallback=!rows; /* null means the fetch genuinely failed; a real empty result ([]) is live data and must not be overwritten by sample names */
+  if(isFallback)
     rows=[{name:'RIYA K.',xp:640},{name:'DEV P.',xp:520},{name:'MARIA S.',xp:410},{name:'TOM H.',xp:300}];
-    rows.push({name:USER.name,xp:S.xp});
+  const lbNote=document.querySelector('#lbDrawer .lbnote');
+  if(lbNote){if(!lbNote.dataset.base)lbNote.dataset.base=lbNote.textContent;
+    lbNote.textContent=(isFallback?'Sample data — live rankings will appear once the leaderboard connects. ':'')+lbNote.dataset.base;}
+  rows=rows.slice();
+  const mine=rows.find(isMe);
+  if(mine)mine.xp=S.xp;else rows.push({name:USER.name,email:USER.email,xp:S.xp}); /* the client's own S.xp is always at least as fresh as a backend row that may predate a pending save (same rule as the sister sites) */
+  rows.sort((a,b)=>(+b.xp||0)-(+a.xp||0));
+  let rank=0,prevXp=null;
+  rows.forEach((r,i)=>{const xp=+r.xp||0;if(prevXp===null||xp!==prevXp)rank=i+1;r.rank=rank;prevXp=xp;}); /* coerce before comparing — backend xp can arrive as a numeric string, which breaks tie-detection under strict !== */
+  const top=rows.slice(0,10);
+  const meRow=rows.find(isMe);
+  list.innerHTML=top.map(r=>lbRowHtml(r)).join('');
+  const meTiedInTop=top.length&&meRow&&meRow.rank===top[top.length-1].rank; /* tied with the visible group even though the slice cut them off — not a distinct lower rank */
+  if(meRow&&!top.some(isMe)&&!meTiedInTop){
+    const sep=document.createElement('p');
+    sep.className='lbnote';sep.style.margin='12px 0 6px';sep.textContent='Your rank';
+    list.appendChild(sep);
+    list.insertAdjacentHTML('beforeend',lbRowHtml(meRow));
   }
-  rows=rows.slice().sort((a,b)=>b.xp-a.xp).slice(0,10);
-  rows.forEach((r,i)=>{
-    const d=document.createElement('div');
-    d.className='lbrow'+(r.name===USER.name?' me':'');
-    d.innerHTML='<span class="rank">'+String(i+1).padStart(2,'0')+'</span>'
-      +'<span class="nm">'+String(r.name||'').replace(/[<>&]/g,'')+'</span>'
-      +'<span class="pts">'+r.xp+' XP</span>';
-    list.appendChild(d);
-  });
 }
 document.querySelectorAll('.lbBtn').forEach(b=>b.addEventListener('click',()=>{
   renderLeaderboard();document.getElementById('lbDrawer').classList.add('open');ev('leaderboard-open');}));
@@ -1011,22 +1039,43 @@ document.getElementById('coachCopy').addEventListener('click',async()=>{
 document.getElementById('peersBtn').addEventListener('click',peers);
 document.getElementById('slackLink').addEventListener('click',e=>{e.preventDefault();peers();});
 
+/* ---------- summit: log build (was unwired — button did nothing on click) ---------- */
+const logBuildBtn=document.querySelector('[data-ev="log-build"]');
+if(logBuildBtn)logBuildBtn.addEventListener('click',()=>{
+  ping(460);window.open('https://betterup.enterprise.slack.com/','_blank');
+  toast('Opening Slack — post it in #ai-builds',2);ev('log-build-click');
+});
+
 /* ---------- restore ---------- */
 (function restore(){
-  load();setXp();
-  const done=Object.keys(S.cleared).map(Number).filter(n=>n<=5).sort();
-  const saved={...S.cleared};S.cleared={};
-  done.forEach(id=>advance(id,true));
-  if(saved[6])S.cleared[6]=1;
-  Object.keys(S.courses).forEach(k=>markCourse(k,true));
-  if(S.range)drawChart(S.range);
-  Object.entries(S.fields).forEach(([k,val])=>{
-    const t=document.querySelector(`[data-f="${k}"]`);if(t)t.value=val;});
-  if(S.applied)doApply(true);
-  if(S.reflectOpen)doReflect(true);
-  if(S.mailed)doMail(true);
+  RESTORING=true; /* nothing changes during this replay — every save() below writes localStorage only, no network POST */
+  let done=[];
+  try{
+    load();setXp();
+    done=Object.keys(S.cleared).map(Number).filter(n=>n<=5).sort();
+    const saved={...S.cleared};S.cleared={};
+    done.forEach(id=>advance(id,true));
+    /* stages 6 and 7 must also replay through advance() (not just set the flag) so it
+       unlocks the stage after it — otherwise s7/s8 stay .locked forever after any refresh */
+    if(saved[6])advance(6,true);
+    if(saved[7])advance(7,true);
+    Object.keys(S.courses).forEach(k=>markCourse(k,true));
+    if(S.range){drawChart(S.range);
+      /* restore the plotted-state UI too: repopulate the score line and relabel the
+         button, so a reload doesn't show an empty box + "Plot my terrain" that
+         errors out even though a chart is already drawn */
+      const si=document.getElementById('scoreIn');if(si&&S.range.raw)si.value=S.range.raw;
+      const sg=document.getElementById('scoreGo');if(sg)sg.textContent='Re-plot';}
+    Object.entries(S.fields).forEach(([k,val])=>{
+      const t=document.querySelector(`[data-f="${k}"]`);if(t)t.value=val;});
+    if(S.applied)doApply(true);
+    if(S.reflectOpen)doReflect(true);
+    if(S.mailed)doMail(true);
+  }catch(e){console.error('EYR restore hit an error, continuing with whatever state was recovered:',e);}
+  RESTORING=false; /* always re-armed, even if the block above threw, so later real actions still sync to the backend */
   /* open the first unfinished stage */
-  const next=Math.min(done.length+1,6);
+  const clearedCount=[1,2,3,4,5,6,7].filter(id=>S.cleared[id]).length;
+  const next=Math.min(clearedCount+1,8);
   document.querySelectorAll('.stage').forEach(s=>s.classList.remove('open'));
   const el=document.getElementById('s'+next);if(el&&!el.classList.contains('locked'))el.classList.add('open');
   refresh();
