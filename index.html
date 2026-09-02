@@ -3,9 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <title>Expand Your Range — BU Learning</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -253,9 +250,8 @@ a.btn{text-decoration:none}
 .acts{display:flex;gap:9px;flex-wrap:wrap;margin-top:4px}
 
 .vid{aspect-ratio:16/9;border-radius:12px;border:1px dashed rgba(255,43,122,.42);display:grid;place-items:center;
-  text-align:center;color:var(--dim);background:rgba(255,43,122,.06);margin-bottom:14px;font-size:12.5px;overflow:hidden}
+  text-align:center;color:var(--dim);background:rgba(255,43,122,.06);margin-bottom:14px;font-size:12.5px}
 .vid b{display:block;color:var(--text);font-size:15px;margin-bottom:3px}
-.vid video{width:100%;height:100%;object-fit:contain;background:#000;border-radius:11px;display:block}
 .pbox{border:1px solid var(--line);border-radius:11px;background:rgba(0,0,0,.4);padding:14px;margin:10px 0}
 .pbox code{color:var(--mint);font-family:var(--mono);font-size:12.5px}
 ol.steps{counter-reset:s;list-style:none;margin:12px 0 14px}
@@ -396,21 +392,27 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
       <button class="coachBtn coachBtnSmall">🤖</button>
     </div>
   <section class="stage on open current" id="s1">
-    <div class="sh"><div class="node">01</div>
-      <div><h3>The brief</h3><p>Lee Gonzales on what RANGE is — and what it isn't</p></div>
-      <span class="tag">3 min</span></div>
-    <div class="body">
-      <video controls preload="metadata" style="width:100%;aspect-ratio:16/9;border-radius:12px;background:#000;display:block;margin-bottom:14px">
-        <source src="betterup-range-intro.mp4" type="video/mp4">
-        Your browser doesn't support embedded video — <a href="betterup-range-intro.mp4">download the video</a>.
+  <div class="sh"><div class="node">01</div>
+    <div><h3>The pattern</h3><p>Before you weave anything, see where automation actually belongs</p></div>
+    <span class="tag">3 min</span></div>
+  <div class="body">
+    <div class="vid">
+      <video controls preload="metadata" playsinline
+             poster="assets/range-explainer-poster.jpg">
+        <source src="BetterUp RANGE_ Your AI Fluency Score_720p.mp4" type="video/mp4">
+        Your browser can't play this video.
+        <a href="BetterUp RANGE_ Your AI Fluency Score_720p.mp4">Download it instead</a>.
       </video>
-      <div class="acts"><button class="btn" data-next="1">I've watched it — continue</button></div>
     </div>
-  </section>
+    <p class="vcap"><b>Explainer video</b> · Why automation fails when it skips the map · 3 min</p>
+    <p class="edge" style="margin-bottom:12px">Program 3 · Augment and Automate Your Business. Outcome: map a real process, identify where AI belongs, and build a repeatable Claude Project or workflow that someone else can run without you.</p>
+    <div class="acts"><button class="btn" data-next="1">I've watched it — continue</button></div>
+  </div>
+</section>
 
   <section class="stage locked" id="s2">
     <div class="sh"><div class="node">02</div>
-      <div><h3>Read your terrain</h3><p>Run the RANGE evaluator in your own Claude, then bring the score back — required before you continue</p></div>
+      <div><h3>Read your terrain</h3><p>Run the RANGE evaluator in your own Claude, then bring the score back — optional, you can skip and do it later</p></div>
       <span class="tag">5 min</span></div>
     <div class="body">
       <ol class="steps"><li>Copy the prompt below.</li><li>Open Claude, paste it, let it run.</li>
@@ -421,7 +423,8 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
       <textarea class="mono" id="scoreIn" placeholder="RANGE | 2026-09-01 | R:2 A:2 N:1 G:2 EF:3 | Total:10/25 | first run"></textarea>
       <div class="err" id="scoreErr">Couldn't read that. Paste the line beginning with RANGE, including R: A: N: G: EF: values.</div>
       <button class="btn" id="scoreGo">Plot my terrain</button>
-      <p class="edge" style="margin-top:8px">You can re-run the evaluator any time and re-plot here to see the shift.</p>
+      <button class="btn ghost" id="rangeSkip" data-next="2">Skip for now — continue without a score</button>
+      <p class="edge" style="margin-top:8px">Optional: you can run the evaluator any time and come back to plot it.</p>
       <div class="chart" id="chartWrap">
         <h4>Your RANGE profile</h4>
         <svg id="chart" viewBox="0 0 620 250" aria-label="RANGE profile chart"></svg>
@@ -514,7 +517,7 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
   <section class="stage locked" id="s7">
     <div class="sh"><div class="node">✎</div>
       <div><h3>Reflect</h3><p>How did it go once you tried it for real?</p></div>
-      <span class="tag">Required</span></div>
+      <span class="tag">Optional</span></div>
     <div class="body">
       <div class="panel" id="reflectPanel">
         <h5>Reflect — whenever you've had a go</h5>
@@ -525,7 +528,10 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
         <textarea rows="2" data-f="r2" placeholder="Type your answer here..."></textarea>
         <div class="acts">
           <button class="btn gold" data-next="7">Log my reflection</button>
+          <button class="btn ghost" id="reflectSkip">Skip for now — I'll reflect later</button>
         </div>
+        <p class="edge" id="reflectSkipNote" style="display:none;margin-top:8px">
+          An email draft to bu.learning@betterup.co is ready in your mail app — send it whenever, no rush.</p>
       </div>
     </div>
   </section>
@@ -614,21 +620,9 @@ function ping(){}
 const KEY='eyr:'+USER.email;
 const S={xp:0,cleared:{},courses:{},range:null,fields:{},applied:false,reflectOpen:false,mailed:false,shares:{},opened:{}};
 let RESTORING=false; /* true only while restore() replays already-persisted state through these same code paths to rebuild the UI on load */
-let saveInFlight=false,saveDirty=false; /* ensures at most one save POST is in flight at a time (see save()) */
 function save(){
-  try{
-    const prev=JSON.parse(localStorage.getItem(KEY)||'null'); /* pull in anything a sibling tab already persisted since this tab last loaded, so this tab's full-state snapshot can't clobber that tab's progress */
-    if(prev){
-      if(prev.cleared)Object.assign(S.cleared,prev.cleared);
-      if(prev.courses)Object.assign(S.courses,prev.courses);
-      if(typeof prev.xp==='number'&&prev.xp>S.xp)S.xp=prev.xp;
-    }
-  }catch(e){}
   try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
-  if(!API||RESTORING)return;
-  if(saveInFlight){saveDirty=true;return;} /* a save POST is already in flight — coalesce into one follow-up with the latest state instead of racing concurrent overlapping POSTs that could be applied out of order */
-  saveInFlight=true;
-  post('save',{state:S}).then(()=>{saveInFlight=false;if(saveDirty){saveDirty=false;save();}});
+  if(API&&!RESTORING)post('save',{state:S}); /* skip re-POSTing during restore's replay — nothing changed, so don't fire a burst of overlapping unsequenced requests each holding a different partial snapshot */
 }
 function load(){
   try{let r=localStorage.getItem(KEY);
@@ -654,13 +648,12 @@ function flush(useBeacon){
 function post(action,payload,useBeacon){
   const body=JSON.stringify(Object.assign({action:action,game:GAME,email:USER.email,name:USER.name,session:SESSION},payload));
   if(useBeacon&&navigator.sendBeacon){ /* fetch() is routinely cancelled once page unload begins — sendBeacon is built to survive it */
-    try{if(navigator.sendBeacon(API,new Blob([body],{type:'text/plain;charset=utf-8'})))return Promise.resolve();}catch(e){}
+    try{if(navigator.sendBeacon(API,new Blob([body],{type:'text/plain;charset=utf-8'})))return;}catch(e){}
   }
   try{
-    const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),15000); /* a request that merely hangs (never resolves or rejects) would otherwise leave saveInFlight stuck true and block every later save POST (same fix as the sister sites) */
-    return fetch(API,{method:'POST',keepalive:true,signal:ctrl.signal,headers:{'Content-Type':'text/plain;charset=utf-8'},body:body})
-      .catch(function(e){}).finally(()=>clearTimeout(t)); /* keepalive lets a request issued near tab-close/refresh survive page teardown (same fix as the sister sites); the .catch keeps real network failures from surfacing as an unhandled promise rejection */
-  }catch(e){return Promise.resolve();} /* callers that don't use the return value (e.g. flush()) are unaffected; save() chains on it to sequence its POSTs */
+    fetch(API,{method:'POST',keepalive:true,headers:{'Content-Type':'text/plain;charset=utf-8'},body:body})
+      .catch(function(e){}); /* keepalive lets a request issued near tab-close/refresh survive page teardown (same fix as the sister sites); the .catch keeps real network failures from surfacing as an unhandled promise rejection */
+  }catch(e){}
 }
 setInterval(()=>{const n=Date.now();
   if(document.visibilityState==='visible')visible+=n-lastTick;lastTick=n;},1000);
@@ -767,7 +760,7 @@ function drawMap(){
 }
 function refresh(){const n=Object.keys(S.cleared).length;
   document.getElementById('hStep').textContent=Math.min(n,5)+'/5';
-  document.getElementById('hBar').style.width=(Math.min(n,6)/6*100)+'%';drawMap(); /* n can reach 7 once the optional Reflect checkpoint (s7) is cleared; clamp so the underlying value never exceeds 100% (same fix as the sister sites) */
+  document.getElementById('hBar').style.width=(n/6*100)+'%';drawMap();
   const label=n===0?'Start at HOME':n>=6?'Summit':String(n).padStart(2,'0')+' → '+String(n+1).padStart(2,'0');
   const prog=document.getElementById('mapProg');if(prog)prog.textContent=label;
   const vprog=document.getElementById('viewerProg');if(vprog)vprog.textContent=label;
@@ -796,12 +789,12 @@ function advance(id,silent){
   const el=document.getElementById('s'+id);
   if(el){el.classList.remove('on');el.classList.add('done');if(!silent)el.classList.remove('open');}
   const nx=document.getElementById('s'+(id+1));
-  if(nx&&!already){nx.classList.remove('locked');nx.classList.add('on');} /* unlocked, not auto-opened — reach it via the route. Guarded by !already so re-saving an already-cleared panel can't re-tag a stage the learner has since passed as "on" (same rule as the sister sites) */
+  if(nx){nx.classList.remove('locked');nx.classList.add('on');} /* unlocked, not auto-opened — reach it via the route */
   if(id===6&&!silent&&!already)toast('Summit reached',1); /* Summit is now its own step */
   refresh();save();
   if(!silent&&!already)burstAt(Math.min(id-1,5));
   if(!silent){
-    if(nx&&!already)setTimeout(()=>openOnly('s'+(id+1)),240); /* only auto-advance on first completion — re-saving an already-cleared Apply/Reflect panel should leave the learner on it, not push them forward */
+    if(nx)setTimeout(()=>openOnly('s'+(id+1)),240); /* every step flows straight into the next */
     if(!already&&id<6)toast('Next checkpoint unlocked',2);}
 }
 document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',()=>{
@@ -823,13 +816,7 @@ document.querySelectorAll('.sh').forEach(h=>h.addEventListener('click',()=>{
   if(s.classList.contains('open'))s.classList.remove('open');else openOnly(s.id);}));
 
 function markCourse(k,silent){
-  if(!silent){
-    let alreadyElsewhere=false; /* a sibling tab may already have cleared and saved this course while this tab's own DOM/state hadn't caught up */
-    try{const prev=JSON.parse(localStorage.getItem(KEY)||'null');alreadyElsewhere=!!(prev&&prev.courses&&prev.courses[k]);}catch(e){}
-    if(alreadyElsewhere)silent=true; /* don't award XP twice for the same course clear */
-  }
-  const row=document.getElementById(k);if(!row)return; /* guard against a stray/mismatched S.courses key aborting the rest of restore()'s replay (same rule as the sister sites) */
-  const b=row.querySelector('[data-course]');
+  const row=document.getElementById(k),b=row.querySelector('[data-course]');
   S.courses[k]=1;row.classList.remove('ready');row.classList.add('done');
   b.textContent='Done';b.disabled=true;
   if(!silent){ping(720);addXp(120);ev('course-done',k);}
@@ -929,6 +916,22 @@ document.getElementById('doneMail').addEventListener('click',()=>{
 document.getElementById('applyGo').addEventListener('click',()=>{doApply();advance(5);});
 /* Log my reflection — records answers (blank is fine) then advances */
 document.querySelectorAll('#reflectPanel [data-next="7"]').forEach(b=>b.addEventListener('click',()=>doReflect()));
+/* Skip is only allowed via an email to BU Learning saying you'll reflect later */
+const rs=document.getElementById('reflectSkip');
+if(rs)rs.addEventListener('click',()=>{
+  const name=document.getElementById('meName').textContent;
+  const body='Hi BU Learning,\n\nI\u2019ve reached the Summit of Expand Your Range but I\u2019d like to complete my reflection later.\n\nName: '+name
+    +'\nDate: '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})
+    +'\n\nI\u2019ll come back and log my reflection once I\u2019ve had a proper go at applying it.\n';
+  window.location.href='mailto:bu.learning@betterup.co'
+    +'?subject='+encodeURIComponent('Expand Your Range — I\u2019ll reflect later')
+    +'&body='+encodeURIComponent(body);
+  S.reflectDeferred=true;
+  const note=document.getElementById('reflectSkipNote');if(note)note.style.display='block';
+  ping(500);ev('reflect-deferred');flush();toast('Email drafted — reflect whenever you\u2019re ready',2);
+  save();
+  setTimeout(()=>advance(7),600); /* still unlocks what comes next */
+});
 
 document.getElementById('pCopy').addEventListener('click',async()=>{ping(500);
   try{await navigator.clipboard.writeText(document.getElementById('pTxt').textContent);
@@ -959,7 +962,7 @@ function drawChart(v){
   document.getElementById('chart').innerHTML=h;
   document.getElementById('edgeTxt').innerHTML=
     `Your growth edge is <b>${DIMS.find(d=>v[d[1]]===lo)[0]}</b>, lowest at ${lo}. `+
-    `Levels: 1–2 pre-pilot · 3 pilot · 4 builder · 5 multiplier. Re-run the evaluator any time and re-plot here to see the shift.`; /* no scripted end-of-program second run exists — point at the real affordance (Re-plot) instead of promising one (same copy rule as the sister sites) */
+    `Levels: 1–2 pre-pilot · 3 pilot · 4 builder · 5 multiplier. You'll run this again at the end to see the shift.`;
   document.getElementById('chartWrap').classList.add('show');
 }
 document.getElementById('scoreGo').addEventListener('click',()=>{
@@ -1006,11 +1009,8 @@ async function renderLeaderboard(){
   if(lbNote){if(!lbNote.dataset.base)lbNote.dataset.base=lbNote.textContent;
     lbNote.textContent=(isFallback?'Sample data — live rankings will appear once the leaderboard connects. ':'')+lbNote.dataset.base;}
   rows=rows.slice();
-  const mineRows=rows.filter(isMe);
-  if(mineRows.length){
-    mineRows[0].xp=S.xp; /* the client's own S.xp is always at least as fresh as a backend row that may predate a pending save (same rule as the sister sites) */
-    if(mineRows.length>1)rows=rows.filter(r=>!isMe(r)||r===mineRows[0]); /* collapse stale duplicate backend rows for the same person (e.g. a pre-normalization mixed-case email) so "me" only ever renders once */
-  }else rows.push({name:USER.name,email:USER.email,xp:S.xp});
+  const mine=rows.find(isMe);
+  if(mine)mine.xp=S.xp;else rows.push({name:USER.name,email:USER.email,xp:S.xp}); /* the client's own S.xp is always at least as fresh as a backend row that may predate a pending save (same rule as the sister sites) */
   rows.sort((a,b)=>(+b.xp||0)-(+a.xp||0));
   let rank=0,prevXp=null;
   rows.forEach((r,i)=>{const xp=+r.xp||0;if(prevXp===null||xp!==prevXp)rank=i+1;r.rank=rank;prevXp=xp;}); /* coerce before comparing — backend xp can arrive as a numeric string, which breaks tie-detection under strict !== */
