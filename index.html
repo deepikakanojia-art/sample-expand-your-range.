@@ -159,6 +159,34 @@ body{font-family:var(--hn);background:var(--bg);color:var(--text);min-height:100
   background:transparent;border:1px solid rgba(79,232,202,.4);color:var(--mint);border-radius:8px;padding:10px;cursor:pointer}
 #coachClose:hover{box-shadow:0 0 20px rgba(79,232,202,.3)}
 
+/* ===== drawer backdrop (Bug 22: click-outside-to-close for lbDrawer/coachDrawer) ===== */
+#drawerBackdrop{position:fixed;inset:0;z-index:220;background:rgba(0,0,0,.5);
+  opacity:0;pointer-events:none;transition:opacity .3s}
+#drawerBackdrop.show{opacity:1;pointer-events:auto}
+
+/* ===== IDENTITY MODAL ===== */
+#idBackdrop{position:fixed;inset:0;z-index:300;background:rgba(6,8,12,.82);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:20px}
+#idBackdrop.open{display:flex}
+#idModal{width:380px;max-width:100%;background:linear-gradient(180deg,#151222,#0E0C16);
+  border:1px solid rgba(0,217,232,.35);border-radius:14px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(0,217,232,.15);padding:26px}
+#idModal h3{font-family:var(--mono);font-weight:700;letter-spacing:1.5px;font-size:15px;color:var(--teal);
+  text-shadow:0 0 14px rgba(0,217,232,.5);margin-bottom:8px}
+#idModal .idnote{font-size:12.5px;color:var(--dim);line-height:1.5;margin-bottom:18px}
+#idModal .idLbl{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--dim);margin-bottom:5px}
+#idModal input{width:100%;box-sizing:border-box;background:rgba(0,0,0,.4);border:1px solid var(--line);
+  border-radius:8px;padding:10px 12px;color:var(--cream);font-size:13.5px;margin-bottom:14px}
+#idModal input:focus{outline:none;border-color:var(--teal)}
+#idErr{min-height:16px;font-size:11.5px;color:var(--pink);margin:-6px 0 12px}
+#idModal #idSubmit{width:100%;font-family:var(--mono);letter-spacing:1.5px;font-size:11.5px;font-weight:700;
+  background:linear-gradient(180deg,#6FE9FA,var(--teal));color:#00232A;border:none;border-radius:8px;
+  padding:11px;cursor:pointer}
+#idModal #idSubmit:hover{box-shadow:0 0 20px rgba(0,217,232,.5)}
+#idModal #idCancel{width:100%;margin-top:8px;font-family:var(--mono);letter-spacing:1.5px;font-size:11.5px;
+  background:transparent;border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:10px;cursor:pointer}
+
 
 /* ===== HUD ===== */
 .hud{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
@@ -185,6 +213,10 @@ body{font-family:var(--hn);background:var(--bg);color:var(--text);min-height:100
   font-family:var(--mono);font-size:12.5px;font-weight:700;color:#fff;
   background:linear-gradient(145deg,var(--pink),var(--bupink));
   box-shadow:0 0 18px rgba(255,43,122,.5);border:1px solid rgba(255,150,190,.5)}
+.me .who .meChange{display:block;margin-top:2px;font-size:9px;font-family:var(--mono);letter-spacing:.08em;
+  color:var(--dim);background:none;border:none;padding:0;cursor:pointer;
+  text-decoration:underline;text-decoration-color:rgba(167,155,184,.4)}
+.me .who .meChange:hover{color:var(--teal);text-decoration-color:var(--teal)}
 
 /* ===== layout ===== */
 .wrap{position:relative;z-index:10;max-width:1440px;margin:0 auto;padding:24px 28px 96px}
@@ -359,12 +391,12 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
 <header class="hud">
   <div class="brand"><b>BU Learning</b><i>Expand Your Range</i></div>
   <div class="stat"><u>Altitude</u><b id="hXp" class="p">0 XP</b></div>
-  <div class="stat"><u>Checkpoint</u><b id="hStep">0/5</b></div>
+  <div class="stat"><u>Checkpoint</u><b id="hStep">0/8</b></div>
   <div class="bar"><i id="hBar"></i></div>
   <button class="lbBtn" id="lbBtn">🏆 Leaderboard</button>
   <button class="coachBtn" id="coachBtn">🤖 AI Coach</button>
   <div class="me">
-    <div class="who"><b id="meName">—</b></div>
+    <div class="who"><b id="meName">—</b><button id="meChange" class="meChange" type="button">not you? change</button></div>
     <div class="av" id="meAv">—</div>
   </div>
 </header>
@@ -388,7 +420,7 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
     <span class="mono">We track progress and page activity to improve the programme</span>
   </p>
 </main>
-<div id="stageViewer" class="stageViewer" aria-hidden="true">
+<div id="stageViewer" class="stageViewer" aria-hidden="true" inert>
     <div class="viewerHead">
       <button id="backToRoute" class="backBtn">← Back to route</button>
       <span class="prog" id="viewerProg"></span>
@@ -400,11 +432,11 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
       <div><h3>The brief</h3><p>Lee Gonzales on what RANGE is — and what it isn't</p></div>
       <span class="tag">3 min</span></div>
     <div class="body">
-      <video controls preload="metadata" style="width:100%;aspect-ratio:16/9;border-radius:12px;background:#000;display:block;margin-bottom:14px">
+      <video id="s1Video" controls preload="metadata" style="width:100%;aspect-ratio:16/9;border-radius:12px;background:#000;display:block;margin-bottom:14px">
         <source src="BetterUp RANGE_ Your AI Fluency Score_720p.mp4" type="video/mp4">
         Your browser doesn't support embedded video — <a href="BetterUp RANGE_ Your AI Fluency Score_720p.mp4">download the video</a>.
       </video>
-      <div class="acts"><button class="btn" data-next="1">I've watched it — continue</button></div>
+      <div class="acts"><button class="btn" data-next="1" disabled>I've watched it — continue</button></div>
     </div>
   </section>
 
@@ -441,7 +473,7 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
           <b>Rethink How You Decide with AI</b>
           <span>U. Michigan · 5 hrs · use AI as a thought partner — surface blind spots, weigh trade-offs, build a decision system that updates</span></div>
         <div class="acts"><a class="btn crs" id="c1open" data-ev="open-c1" target="_blank" rel="noopener" href="https://www.coursera.org/programs/range-oixf2/learn/rethink-how-you-decide-with-ai?authProvider=betterup&amp;badgeTemplateId=qPgSfOOfSja4Enzjn3o22Q">Open</a>
-          <button class="btn ghost" data-course="c1">Cleared</button></div></div>
+          <button class="btn ghost" data-course="c1" disabled>Cleared</button></div></div>
       <div class="course share" id="sh1"><span class="dot"></span>
         <div class="meta"><em>Optional · Share your milestone</em>
           <b>Earned your Ascent 01 certificate?</b>
@@ -470,8 +502,14 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
       <div class="course ready" id="c3"><span class="dot"></span>
         <div class="meta"><em>The ridge · Judgment &amp; reliability</em><b>Trustworthy Generative AI</b>
           <span>Vanderbilt · 9 hrs · 4.8 — judge whether a problem fits GenAI, frame it to reduce risk, verify outputs</span></div>
-        <div class="acts"><a class="btn crs" id="c3open" data-ev="open-c3" target="_blank" rel="noopener" href="https://www.coursera.org/learn/trustworthy-generative-ai">Open</a>
-          <button class="btn ghost" data-course="c3">Cleared</button></div></div>
+        <div class="acts"><!-- TODO(bug 23): still the plain public Coursera URL — needs the real BetterUp enterprise Coursera program URL for "Trustworthy Generative AI" (authProvider=betterup&badgeTemplateId=...), same pattern as c1open/c2open above. Do not invent a slug/ID; get it from whoever owns this Coursera program. -->
+          <a class="btn crs" id="c3open" data-ev="open-c3" target="_blank" rel="noopener" href="https://www.coursera.org/learn/trustworthy-generative-ai">Open</a>
+          <button class="btn ghost" data-course="c3" disabled>Cleared</button></div></div>
+      <div class="course share" id="sh3"><span class="dot"></span>
+        <div class="meta"><em>Optional · Share your milestone</em>
+          <b>Earned your Ridge certificate?</b>
+          <span>Share it with your manager, L&amp;D or your team — it's a milestone worth showing. Entirely optional, never required.</span></div>
+        <div class="acts"><button class="btn ghost" data-share="sh3" data-cn="Trustworthy Generative AI" disabled>Share via Gmail</button></div></div>
       <div class="acts hide" id="n4"><button class="btn" data-next="4">Continue to solo ascent</button></div>
     </div>
   </section>
@@ -514,7 +552,7 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
   <section class="stage locked" id="s7">
     <div class="sh"><div class="node">✎</div>
       <div><h3>Reflect</h3><p>How did it go once you tried it for real?</p></div>
-      <span class="tag">Required</span></div>
+      <span class="tag">Optional</span></div>
     <div class="body">
       <div class="panel" id="reflectPanel">
         <h5>Reflect — whenever you've had a go</h5>
@@ -524,7 +562,7 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
         <label class="q"><i>02</i>What worked, where did you get stuck, and what would you try next?</label>
         <textarea rows="2" data-f="r2" placeholder="Type your answer here..."></textarea>
         <div class="acts">
-          <button class="btn gold" data-next="7">Log my reflection</button>
+          <button class="btn gold" id="reflectGo">Log my reflection</button>
         </div>
       </div>
     </div>
@@ -544,7 +582,8 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
 
 
 <button class="peers" id="peersBtn"><em></em> Ask your peers</button>
-<div id="coachDrawer" aria-hidden="true">
+<div id="drawerBackdrop" aria-hidden="true" inert></div>
+<div id="coachDrawer" aria-hidden="true" inert>
   <h3>🤖 ASK YOUR AI COACH</h3>
   <p class="lbnote">Stuck on anything in this program? Write your question below, then take it to your own Claude — this doesn't send it anywhere, it just helps you frame it clearly.</p>
   <textarea id="coachQ" rows="4" placeholder="e.g. I'm not sure what my RANGE score actually means, or how to write a prompt for my own work..."></textarea>
@@ -553,12 +592,28 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
   <p class="edge" style="margin-top:10px">Paste it in, ask away, and come back here anytime — your progress is saved.</p>
   <button id="coachClose">Close</button>
 </div>
-<div id="lbDrawer" aria-hidden="true">
+<div id="lbDrawer" aria-hidden="true" inert>
   <h3>🏆 CLIMBER RANKINGS</h3>
   <p class="lbnote">Top climbers across Expand Your Range, by altitude (XP). Your name is visible to fellow climbers once you've made progress.</p>
   <div id="lbList"></div>
   <button id="lbClose">Close</button>
 </div>
+
+<!-- ===== IDENTITY MODAL ===== -->
+<div id="idBackdrop" aria-hidden="true">
+  <div id="idModal" role="dialog" aria-modal="true" aria-labelledby="idTitle">
+    <h3 id="idTitle">Welcome to Expand Your Range</h3>
+    <p class="idnote">Sign in with your BetterUp identity so your progress, XP and leaderboard rank are tracked under your real name.</p>
+    <label class="idLbl" for="idName">Name</label>
+    <input id="idName" type="text" autocomplete="name" placeholder="Jordan Smith">
+    <label class="idLbl" for="idEmail">BetterUp email</label>
+    <input id="idEmail" type="email" autocomplete="email" placeholder="jordan.smith@betterup.co">
+    <div id="idErr" aria-live="polite"></div>
+    <button id="idSubmit" type="button">Continue</button>
+    <button id="idCancel" type="button" style="display:none">Cancel</button>
+  </div>
+</div>
+
 <div class="toasts" id="toasts"></div>
 
 <script>
@@ -568,21 +623,82 @@ label.q i{font-style:normal;color:var(--pink);font-family:var(--mono);font-size:
    =================================================================== */
 const API='https://script.google.com/macros/s/AKfycbwhQ2-lyLIVj--aVVCW3OSHVDc1-N08f02NyLoSZak-bvzYSGx5PUXFyjvsJEgRlm2zmQ/exec';
 const GAME='expand-your-range'; // routes data to the "EYR — …" tabs in the shared sheet
-function whoAmI(){
-  try{const saved=JSON.parse(localStorage.getItem('eyr:whoami')||'null');
-    if(saved&&saved.email&&saved.name)return saved;}catch(e){}
-  if(window.BU_USER&&window.BU_USER.email)
-    return {name:window.BU_USER.name||window.BU_USER.email.split('@')[0],email:window.BU_USER.email};
-  const nRaw=prompt('Welcome to Expand Your Range \u2014 what\u2019s your name?');
-  const name=(nRaw||'').trim()||'Guest';
-  const eRaw=prompt('And your BetterUp email address?');
-  let email=(eRaw||'').trim();
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))email='guest+'+Date.now()+'@test.local';
-  const who={name:name,email:email};
-  try{localStorage.setItem('eyr:whoami',JSON.stringify(who));}catch(e){}
-  return who;
+const BU_EMAIL_RE=/^[^@\s]+@betterup\.co$/i; /* only @betterup.co is accepted — a personal address or typo must never be stored permanently */
+
+/* Copies an existing progress snapshot from the old identity's storage key to the new one, so
+   correcting a wrong/legacy email never restarts XP/progress at zero. Never overwrites a snapshot
+   that already exists under the new key (e.g. someone else's progress). */
+function migrateProgress(oldEmail,newEmail){
+  try{
+    if(!oldEmail)return;
+    const oldKey='eyr:'+String(oldEmail).trim().toLowerCase();
+    const newKey='eyr:'+String(newEmail).trim().toLowerCase();
+    if(oldKey===newKey)return;
+    if(localStorage.getItem(newKey))return; /* something is already saved under the corrected key — don't clobber it */
+    const prev=localStorage.getItem(oldKey);
+    if(prev)localStorage.setItem(newKey,prev);
+  }catch(e){}
 }
-const ME=whoAmI();
+
+/* Renders the identity modal (in place of the old blocking prompt() calls) and resolves with
+   {name,email} once the learner submits a non-empty name and a valid @betterup.co email —
+   re-prompting inline on bad input instead of ever falling back to a placeholder address.
+   When allowCancel is true (the "not you? change" flow) resolves with null on Cancel. */
+function showIdModal(prefill,allowCancel){
+  return new Promise(function(resolve){
+    const backdrop=document.getElementById('idBackdrop'),
+      nameEl=document.getElementById('idName'),emailEl=document.getElementById('idEmail'),
+      err=document.getElementById('idErr'),submit=document.getElementById('idSubmit'),
+      cancel=document.getElementById('idCancel');
+    nameEl.value=(prefill&&prefill.name)||'';
+    emailEl.value=(prefill&&prefill.email)||'';
+    err.textContent='';
+    cancel.style.display=allowCancel?'block':'none';
+    backdrop.classList.add('open');backdrop.setAttribute('aria-hidden','false');
+    nameEl.focus();
+    function onSubmit(){
+      const name=nameEl.value.trim();
+      const email=emailEl.value.trim();
+      if(!name){err.textContent='Please enter your name.';nameEl.focus();return;}
+      if(!BU_EMAIL_RE.test(email)){err.textContent='Please enter a valid @betterup.co email address.';emailEl.focus();return;}
+      cleanup();resolve({name:name,email:email});
+    }
+    function onCancel(){cleanup();resolve(null);}
+    function onKey(e){if(e.key==='Enter')onSubmit();}
+    function cleanup(){
+      backdrop.classList.remove('open');backdrop.setAttribute('aria-hidden','true');
+      submit.removeEventListener('click',onSubmit);
+      cancel.removeEventListener('click',onCancel);
+      nameEl.removeEventListener('keydown',onKey);
+      emailEl.removeEventListener('keydown',onKey);
+    }
+    submit.addEventListener('click',onSubmit);
+    cancel.addEventListener('click',onCancel);
+    nameEl.addEventListener('keydown',onKey);
+    emailEl.addEventListener('keydown',onKey);
+  });
+}
+
+function whoAmI(){
+  let legacy=null;
+  try{
+    const saved=JSON.parse(localStorage.getItem('eyr:whoami')||'null');
+    if(saved&&saved.email&&saved.name){
+      if(BU_EMAIL_RE.test(saved.email))return Promise.resolve(saved);
+      legacy=saved; /* saved by an earlier version of this code that accepted any address (or a placeholder
+                       guest+…@test.local) — reprompt, but keep it so its progress can be carried forward */
+    }
+  }catch(e){}
+  if(window.BU_USER&&window.BU_USER.email&&BU_EMAIL_RE.test(window.BU_USER.email))
+    return Promise.resolve({name:window.BU_USER.name||window.BU_USER.email.split('@')[0],email:window.BU_USER.email});
+  return showIdModal(legacy,false).then(function(who){
+    if(legacy)migrateProgress(legacy.email,who.email);
+    try{localStorage.setItem('eyr:whoami',JSON.stringify(who));}catch(e){}
+    return who;
+  });
+}
+
+whoAmI().then(function(ME){
 const USER={name:ME.name,email:String(ME.email||'').toLowerCase()}; /* normalized once here so KEY, isMe and backend rows all agree on casing — same identity rule as the sister sites */
 
 /* ---------- snow ---------- */
@@ -606,6 +722,16 @@ const USER={name:ME.name,email:String(ME.email||'').toLowerCase()}; /* normalize
   document.getElementById('meAv').textContent=ini;
 })();
 
+/* ---------- change identity (fixes a wrong name/email without losing progress) ---------- */
+document.getElementById('meChange').addEventListener('click',function(){
+  showIdModal({name:USER.name,email:USER.email},true).then(function(who){
+    if(!who)return; /* cancelled — leave the current identity untouched */
+    migrateProgress(USER.email,who.email); /* carry existing progress from the old key to the corrected one */
+    try{localStorage.setItem('eyr:whoami',JSON.stringify(who));}catch(e){}
+    location.reload(); /* simplest safe way to re-derive USER/KEY/S and replay restore() under the corrected identity */
+  });
+});
+
 /* ---------- sound ---------- */
 /* sound removed — ping kept as a no-op so all call sites still work */
 function ping(){}
@@ -615,20 +741,70 @@ const KEY='eyr:'+USER.email;
 const S={xp:0,cleared:{},courses:{},range:null,fields:{},applied:false,reflectOpen:false,mailed:false,shares:{},opened:{}};
 let RESTORING=false; /* true only while restore() replays already-persisted state through these same code paths to rebuild the UI on load */
 let saveInFlight=false,saveDirty=false; /* ensures at most one save POST is in flight at a time (see save()) */
-function save(){
+function save(useBeacon){
+  let newlyCleared=[],newlyCoursed=[]; /* checkpoint/course ids a sibling tab already cleared+saved that this tab's in-memory S.cleared/S.courses doesn't know about yet */
   try{
     const prev=JSON.parse(localStorage.getItem(KEY)||'null'); /* pull in anything a sibling tab already persisted since this tab last loaded, so this tab's full-state snapshot can't clobber that tab's progress */
     if(prev){
-      if(prev.cleared)Object.assign(S.cleared,prev.cleared);
-      if(prev.courses)Object.assign(S.courses,prev.courses);
-      if(typeof prev.xp==='number'&&prev.xp>S.xp)S.xp=prev.xp;
+      if(prev.cleared){
+        newlyCleared=Object.keys(prev.cleared).map(Number).filter(id=>!S.cleared[id]);
+        Object.assign(S.cleared,prev.cleared);
+      }
+      if(prev.courses){
+        newlyCoursed=Object.keys(prev.courses).filter(k=>!S.courses[k]);
+        Object.assign(S.courses,prev.courses);
+      }
+      if(prev.fields)S.fields=Object.assign({},prev.fields,S.fields); /* sibling's answer text fills gaps; this tab's own edits win */
+      if(prev.range&&!S.range)S.range=prev.range; /* RANGE score/chart snapshot: adopt sibling's only if this tab has none */
+      if(prev.shares)Object.assign(S.shares,prev.shares); /* certificate-share status */
+      if(prev.opened)Object.assign(S.opened,prev.opened);
+      S.applied=S.applied||!!prev.applied;
+      S.reflectOpen=S.reflectOpen||!!prev.reflectOpen;
+      S.mailed=S.mailed||!!prev.mailed;
+      S.applyXp=S.applyXp||prev.applyXp;
+      S.reflectXp=S.reflectXp||prev.reflectXp;
+      S.rangeXp=S.rangeXp||prev.rangeXp;
+      S.mailXp=S.mailXp||prev.mailXp;
+      if(typeof prev.xp==='number'&&prev.xp>S.xp){S.xp=prev.xp;setXp();} /* Bug 16 fix: repaint Altitude immediately on merge-driven xp bump */
     }
   }catch(e){}
   try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+  /* the merges above just set S.cleared[id]/S.courses[k] directly, bypassing advance()/markCourse() —
+     without this, the DOM keeps the next stage's button .locked and the map pin stale until a reload
+     (the same failure restore()'s replay loop exists to avoid — see its comment further down) */
+  if(!RESTORING){
+    if(newlyCleared.length)syncMergedUnlocks(newlyCleared);
+    if(newlyCoursed.length)newlyCoursed.forEach(k=>markCourse(k,true));
+  }
   if(!API||RESTORING)return;
+  if(useBeacon){
+    /* Page is closing right now: never fall into the saveInFlight/saveDirty queue below —
+       a save queued behind an in-flight POST only fires from that POST's .then(), which
+       never runs if the tab is already gone by the time it resolves. sendBeacon is built
+       to survive page teardown, so send the final state unconditionally, even if a normal
+       save is currently in flight (the backend/tracking sheet just needs the latest state
+       to win, which this call carries). */
+    post('save',{state:S},true);
+    return;
+  }
   if(saveInFlight){saveDirty=true;return;} /* a save POST is already in flight — coalesce into one follow-up with the latest state instead of racing concurrent overlapping POSTs that could be applied out of order */
   saveInFlight=true;
   post('save',{state:S}).then(()=>{saveInFlight=false;if(saveDirty){saveDirty=false;save();}});
+}
+/* replays only the DOM-unlocking half of advance() (no S.cleared write — already merged
+   above; no XP/toast/ev — this tab didn't clear it, the sibling tab already got credit;
+   no save() — already happened, and calling it would recurse) for checkpoints a sibling
+   tab cleared. Sorting ascending matters when two+ ids merge in at once: unlocking the
+   lower id first is what puts .on onto the next stage element before that same element's
+   own turn flips it to .done and unlocks the one after it. */
+function syncMergedUnlocks(ids){
+  ids.sort((a,b)=>a-b).forEach(id=>{
+    const el=document.getElementById('s'+id);
+    if(el){el.classList.remove('on');el.classList.add('done');} /* mirrors advance(id,true)'s silent path: leaves .open alone so an actively-viewed panel isn't yanked shut */
+    const nx=document.getElementById('s'+(id+1));
+    if(nx){nx.classList.remove('locked');nx.classList.add('on');}
+  });
+  refresh(); /* updates hStep/hBar text and calls drawMap() internally, so map pins repaint immediately */
 }
 function load(){
   try{let r=localStorage.getItem(KEY);
@@ -666,8 +842,21 @@ setInterval(()=>{const n=Date.now();
   if(document.visibilityState==='visible')visible+=n-lastTick;lastTick=n;},1000);
 setInterval(flush,20000);
 document.addEventListener('visibilitychange',()=>{
-  ev(document.visibilityState==='visible'?'focus':'blur');if(document.visibilityState!=='visible')flush();});
-window.addEventListener('beforeunload',()=>{ev('session-end','',Math.round(visible/1000));save();flush(true);}); /* save() persists typed-but-unblurred field text (S.fields is updated on every keystroke) synchronously to localStorage, so a close/refresh before blur doesn't lose it — same fix as the sister sites */
+  ev(document.visibilityState==='visible'?'focus':'blur');
+  if(document.visibilityState!=='visible'){
+    save(); /* mobile browsers routinely never fire beforeunload when the app is backgrounded/switched away from — persist typed-but-unblurred field text (S.fields is updated on every keystroke) here too, not just on blur/explicit Save/beforeunload */
+    flush();
+  }
+});
+let unloading=false; /* guard against beforeunload+pagehide both firing and double-sending session-end / double POSTing */
+function onPageClose(){
+  if(unloading)return;unloading=true;
+  ev('session-end','',Math.round(visible/1000));
+  save(true);  /* true = send via sendBeacon, bypassing the one-at-a-time upload queue — see Bug 15 fix below */
+  flush(true);
+}
+window.addEventListener('beforeunload',onPageClose);
+window.addEventListener('pagehide',onPageClose); /* pagehide fires on real unload AND on mobile backgrounding/tab-switch/app-suspend, where beforeunload is unreliable or never fires at all */
 document.addEventListener('click',e=>{
   const b=e.target.closest('button,a');if(!b)return;
   ev('click',b.dataset.ev||b.dataset.next||b.dataset.course||b.id||b.textContent.trim().slice(0,32));
@@ -676,7 +865,7 @@ document.addEventListener('click',e=>{
 /* ---------- ui ---------- */
 const XP={1:100,2:150,3:400,4:200,5:350,6:200,7:150,8:100};
 const DIMS=[['Reach','R'],['Autonomy','A'],['Navigation','N'],['Generalization','G'],['Execution','EF']];
-const PTS=[[92,268],[268,214],[430,178],[598,132],[730,96],[832,52]];
+const PTS=[[92,268],[268,214],[430,178],[598,132],[730,96],[832,52],[864,118],[846,206]]; /* PTS extended with Reflect(7)/Enrol(8) coords so the map always has a pin to return through post-Summit (nav-map-pins fix) */
 const SEG=[
   'M92,268 C170,252 210,224 268,214',
   'M268,214 C326,204 380,196 430,178',
@@ -721,7 +910,7 @@ function drawMap(){
   PTS.forEach((p,i)=>{
     const id=i+1,summit=i===5,home=i===0,done=summit?S.cleared[6]:S.cleared[id],live=!done&&n===i;
     const col=done?'#4FE8CA':(live?'#FF2B7A':'#4A4056');
-    const label=(done||live||home)?(summit?'SUMMIT':(home?'HOME':'0'+id)):'';
+    const label=(done||live||home)?(summit?'SUMMIT':(home?'HOME':id===7?'REFLECT':id===8?'ENROL':'0'+id)):'';
     if(home){
       const hcol=done?'#4FE8CA':'#FFC700';
       h+=`<circle class="homeGlow" cx="${p[0]}" cy="${p[1]}" r="19" fill="${hcol}" opacity=".28"/>
@@ -766,8 +955,8 @@ function drawMap(){
     ping(600);openOnly(id);ev('map-jump',id);}));
 }
 function refresh(){const n=Object.keys(S.cleared).length;
-  document.getElementById('hStep').textContent=Math.min(n,5)+'/5';
-  document.getElementById('hBar').style.width=(Math.min(n,6)/6*100)+'%';drawMap(); /* n can reach 7 once the optional Reflect checkpoint (s7) is cleared; clamp so the underlying value never exceeds 100% (same fix as the sister sites) */
+  document.getElementById('hStep').textContent=Math.min(n,8)+'/8';
+  document.getElementById('hBar').style.width=(Math.min(n,8)/8*100)+'%';drawMap(); /* n now runs 1-8: five checkpoints (s1-s5) + Summit(6) + Reflect(7) + Enrol(8); clamp so the underlying value never exceeds 100% (same fix as the sister sites) */
   const label=n===0?'Start at HOME':n>=6?'Summit':String(n).padStart(2,'0')+' → '+String(n+1).padStart(2,'0');
   const prog=document.getElementById('mapProg');if(prog)prog.textContent=label;
   const vprog=document.getElementById('viewerProg');if(vprog)vprog.textContent=label;
@@ -801,23 +990,67 @@ function advance(id,silent){
   refresh();save();
   if(!silent&&!already)burstAt(Math.min(id-1,5));
   if(!silent){
-    if(nx&&!already)setTimeout(()=>openOnly('s'+(id+1)),240); /* only auto-advance on first completion — re-saving an already-cleared Apply/Reflect panel should leave the learner on it, not push them forward */
+    if(nx)setTimeout(()=>openOnly('s'+(id+1)),240); /* revisit or first-time — either way, navigate forward; only the XP/celebration/unlock-tagging above is first-time-only. Never leave the learner stranded with the panel just closed (line 797) and nowhere to go */
     if(!already&&id<6)toast('Next checkpoint unlocked',2);}
 }
+/* Runtime guard: the hide/show styling on #chartWrap/#n3/#n4 is a UI convenience only —
+   it must not be the sole gate on these transitions. Re-check the real precondition here
+   so unhiding a button via devtools (or any stray class removal) can't advance the
+   learner past a step they haven't actually completed. */
+function preconditionMet(next){
+  if(next===2)return !!S.range;               /* Step 2: RANGE score must be plotted */
+  if(next===3)return !!(S.courses.c1&&S.courses.c2); /* Step 3: both ascents cleared */
+  if(next===4)return !!S.courses.c3;           /* Step 4: Ridge course (c3) cleared */
+  return true; /* other data-next buttons (1,6,7) have no extra precondition */
+}
 document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',()=>{
-  advance(+b.dataset.next);}));
+  const next=+b.dataset.next;
+  if(!preconditionMet(next)){
+    toast('Complete this step first',2);
+    ev('advance-blocked','stage-'+next); /* record the attempt so a bypass attempt is visible in analytics */
+    return;
+  }
+  advance(next);}));
+/* Step 1's continue button stays disabled (native `disabled`, styled via the existing .btn:disabled rule)
+   until the intro video has actually played — closes the "skip video, bank XP" gap. Unlocks on 'ended'
+   or once >=90% has been watched (timeupdate), whichever comes first; a play/loadedmetadata-only check
+   was rejected as too weak since it fires even if the learner immediately pauses/seeks to the end. */
+(function(){
+  const v=document.getElementById('s1Video');
+  const btn=document.querySelector('[data-next="1"]');
+  if(!v||!btn)return;
+  function unlock(){
+    btn.disabled=false;
+    v.removeEventListener('timeupdate',onTime);
+    v.removeEventListener('ended',unlock);
+  }
+  function onTime(){
+    if(v.duration&&v.currentTime/v.duration>=0.9)unlock();
+  }
+  v.addEventListener('timeupdate',onTime);
+  v.addEventListener('ended',unlock);
+})();
 const STAGE_LABEL={s1:'HOME',s2:'02',s3:'03',s4:'04',s5:'05',s6:'SUMMIT',s7:'REFLECT',s8:'ENROL'};
 function openOnly(id){
   document.querySelectorAll('.stage.open').forEach(s=>{if(s.id!==id)s.classList.remove('open');});
   document.querySelectorAll('.stage.current').forEach(s=>{if(s.id!==id)s.classList.remove('current');});
   const el=document.getElementById(id);if(el){el.classList.add('open');el.classList.add('current');}
   const viewer=document.getElementById('stageViewer');
-  if(viewer){viewer.classList.add('show');viewer.scrollTop=0;}
+  if(viewer){
+    viewer.classList.add('show');viewer.scrollTop=0;
+    viewer.setAttribute('aria-hidden','false');viewer.removeAttribute('inert'); /* Bug 21: expose to AT + tab order while shown */
+  }
   const vprog=document.getElementById('viewerProg'); /* reflect the stage actually being viewed, not just overall progress */
   if(vprog&&STAGE_LABEL[id])vprog.textContent=STAGE_LABEL[id];
 }
+function closeStageViewer(){
+  const viewer=document.getElementById('stageViewer');
+  if(!viewer)return;
+  viewer.classList.remove('show');
+  viewer.setAttribute('aria-hidden','true');viewer.setAttribute('inert',''); /* Bug 21: drop out of AT + tab order once hidden */
+}
 document.getElementById('backToRoute').addEventListener('click',()=>{
-  ping(300);document.getElementById('stageViewer').classList.remove('show');ev('back-to-route');});
+  ping(300);closeStageViewer();ev('back-to-route');});
 document.querySelectorAll('.sh').forEach(h=>h.addEventListener('click',()=>{
   const s=h.parentElement;if(s.classList.contains('locked'))return;ping(420);
   if(s.classList.contains('open'))s.classList.remove('open');else openOnly(s.id);}));
@@ -830,13 +1063,15 @@ function markCourse(k,silent){
   }
   const row=document.getElementById(k);if(!row)return; /* guard against a stray/mismatched S.courses key aborting the rest of restore()'s replay (same rule as the sister sites) */
   const b=row.querySelector('[data-course]');
+  if(!b){console.warn('EYR markCourse: no [data-course] button for',k,'— skipping stale/mismatched course id');return;} /* row existed but its button didn't — this was the actual gap in the guard above: it checked `row` but not `b`, so this exact case threw mid-loop and aborted the rest of restore() */
   S.courses[k]=1;row.classList.remove('ready');row.classList.add('done');
   b.textContent='Done';b.disabled=true;
   if(!silent){ping(720);addXp(120);ev('course-done',k);}
   if(k==='c1')enableShare('sh1');
   if(k==='c2')enableShare('sh2');
+  if(k==='c3')enableShare('sh3');
   if(k==='c1'){const r=document.getElementById('c2');r.classList.add('ready');
-    r.querySelectorAll('button').forEach(x=>x.disabled=false);
+    r.querySelector('[data-course]').disabled=!S.opened.c2; /* Bug 5: unlocking c2 must not bypass the Open-click gate — only enable Cleared if c2 was already opened (e.g. on restore) */
     const a=document.getElementById('c2open');
     a.classList.remove('off');a.target='_blank';a.rel='noopener';
     a.href='https://www.coursera.org/programs/range-oixf2/learn/systems-thinking-for-ai-and-automation?authProvider=betterup&badgeTemplateId=qPgSfOOfSja4Enzjn3o22Q';
@@ -847,7 +1082,21 @@ function markCourse(k,silent){
   if(k==='c3')document.getElementById('n4').classList.remove('hide');
   save();
 }
-document.querySelectorAll('[data-course]').forEach(b=>b.addEventListener('click',()=>markCourse(b.dataset.course)));
+/* Bug 5: "Cleared" is pure self-certification — gate it on the course's Open link having been
+   clicked (S.opened[k], set by the c1open/c2open/c3open listeners below), and add a brief
+   confirmation step since completion genuinely can't be verified from this page. */
+function enableCleared(k){
+  const row=document.getElementById(k);if(!row)return;
+  const b=row.querySelector('[data-course]');
+  if(b&&S.opened[k]&&!S.courses[k])b.disabled=false;
+}
+document.querySelectorAll('[data-course]').forEach(b=>b.addEventListener('click',()=>{
+  const k=b.dataset.course;
+  if(b.disabled)return; /* belt-and-suspenders — a real disabled attribute already blocks the click */
+  if(!S.opened[k]){toast('Open the course first');return;}
+  if(!confirm('Confirm you’ve completed and downloaded your certificate.'))return;
+  markCourse(k);
+}));
 
 /* ---------- certificate sharing (optional, pride not pressure) ---------- */
 function enableShare(k){const c=document.getElementById(k);if(!c)return;
@@ -855,7 +1104,7 @@ function enableShare(k){const c=document.getElementById(k);if(!c)return;
   if(S.shares[k]){c.classList.add('shared');b.textContent='Shared \u2713 \u2014 share again';}
   maybeGlow(k);}
 function maybeGlow(k){
-  const course=k==='sh1'?'c1':'c2';const card=document.getElementById(k);
+  const course=k==='sh1'?'c1':k==='sh2'?'c2':'c3';const card=document.getElementById(k);
   if(card&&S.courses[course]&&S.opened[course])card.classList.add('rainbow');}
 function shareCert(k,course){
   const name=document.getElementById('meName').textContent;
@@ -865,16 +1114,20 @@ function shareCert(k,course){
     +'&cc='+encodeURIComponent('bu.learning@betterup.co')
     +'&su='+encodeURIComponent(su)
     +'&body='+encodeURIComponent(body),'_blank');
+  let paidElsewhere=false; /* a sibling tab may already have shared (and been paid for) this certificate */
+  try{const prev=JSON.parse(localStorage.getItem(KEY)||'null');paidElsewhere=!!(prev&&prev.shares&&prev.shares[k]);}catch(e){}
+  if(paidElsewhere)S.shares[k]=1;
   const firstShare=!S.shares[k]; /* re-sharing is allowed, but the XP is a one-time milestone per card */
   S.shares[k]=1;const c=document.getElementById(k);c.classList.add('shared');
   const b=c.querySelector('[data-share]');b.textContent='Shared \u2713 \u2014 share again';
   ping(760);if(firstShare)addXp(40);ev('cert-share',k,course);flush();save();
 }
 document.querySelectorAll('[data-share]').forEach(b=>b.addEventListener('click',()=>shareCert(b.dataset.share,b.dataset.cn.replace(/&amp;/g,'&'))));
-document.getElementById('c1open').addEventListener('click',()=>{S.opened.c1=1;maybeGlow('sh1');save();});
+document.getElementById('c1open').addEventListener('click',()=>{S.opened.c1=1;enableCleared('c1');maybeGlow('sh1');save();});
 document.getElementById('c2open').addEventListener('click',e=>{
   if(e.currentTarget.classList.contains('off'))return;
-  S.opened.c2=1;maybeGlow('sh2');save();});
+  S.opened.c2=1;enableCleared('c2');maybeGlow('sh2');save();});
+document.getElementById('c3open').addEventListener('click',()=>{S.opened.c3=1;enableCleared('c3');maybeGlow('sh3');save();}); /* Bug 5/25: c3 (Ridge) previously had no open-click tracking at all */
 
 /* ---------- field capture ---------- */
 document.querySelectorAll('[data-f]').forEach(t=>{
@@ -890,6 +1143,9 @@ function doApply(silent){
   if(p){const h=p.querySelector('h5');if(h)h.textContent='Apply — saved (you can edit and save again)';}
   const g=document.getElementById('applyGo');if(g)g.textContent='Save again';
   if(!silent){ping(700);
+    let paidElsewhere=false; /* a sibling tab may already have awarded/persisted this XP since this tab's own state hadn't caught up */
+    try{const prev=JSON.parse(localStorage.getItem(KEY)||'null');paidElsewhere=!!(prev&&prev.applyXp);}catch(e){}
+    if(paidElsewhere)S.applyXp=1;
     if(!S.applyXp){addXp(150);S.applyXp=1;}   /* XP once, saving still allowed forever */
     ev('apply-saved','',JSON.stringify({a1:S.fields.a1||'',a2:S.fields.a2||'',a3:S.fields.a3||''}));flush();
     toast('Plan saved',2);}
@@ -900,8 +1156,11 @@ function doReflect(silent){
   S.reflectOpen=true;
   const p=document.getElementById('reflectPanel');
   if(p){const h=p.querySelector('h5');if(h)h.textContent='Reflect — saved (you can edit and save again)';}
-  document.querySelectorAll('#reflectPanel [data-next="7"]').forEach(b=>b.textContent='Save again');
+  const g=document.getElementById('reflectGo');if(g)g.textContent='Save again';
   if(!silent){ping(640);
+    let paidElsewhere=false; /* a sibling tab may already have awarded/persisted this XP since this tab's own state hadn't caught up */
+    try{const prev=JSON.parse(localStorage.getItem(KEY)||'null');paidElsewhere=!!(prev&&prev.reflectXp);}catch(e){}
+    if(paidElsewhere)S.reflectXp=1;
     if(!S.reflectXp){addXp(150);S.reflectXp=1;}
     ev('reflect-saved','',JSON.stringify({r1:S.fields.r1||'',r2:S.fields.r2||''}));flush();
     toast('Reflection saved',2);}
@@ -910,9 +1169,16 @@ function doReflect(silent){
 function doMail(silent){
   S.mailed=true;
   const b=document.getElementById('doneMail');
-  b.disabled=true;b.textContent='Enrolment requested ✓';
+  /* keep the button enabled after success — this is a re-triggerable action
+     (mirrors shareCert's "share again" pattern), not a one-shot permanent disable */
+  b.textContent='Enrolment requested ✓ — resend';
   document.getElementById('mailOk').classList.add('show');
-  if(!silent){ping(720);addXp(100);ev('completion-mailed');flush();}
+  if(!silent){ping(720);
+    let paidElsewhere=false; /* a sibling tab, or an earlier resend in this tab, may already have awarded this one-time XP */
+    try{const prev=JSON.parse(localStorage.getItem(KEY)||'null');paidElsewhere=!!(prev&&prev.mailXp);}catch(e){}
+    if(paidElsewhere)S.mailXp=1;
+    if(!S.mailXp){addXp(100);S.mailXp=1;}   /* XP once; resending the email afterward is free */
+    ev('completion-mailed');flush();}
   save();
 }
 document.getElementById('doneMail').addEventListener('click',()=>{
@@ -920,15 +1186,18 @@ document.getElementById('doneMail').addEventListener('click',()=>{
     +'Name: \nTeam: \nDate: '
     +new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})
     +'\n\nPlease enrol me in the Running with Claude course.\n';
-  window.location.href='mailto:bu.learning@betterup.co'
-    +'?cc=deepika.kanojia@betterup.co'
-    +'&subject='+encodeURIComponent('Expand Your Range completed — enrol me in Running with Claude')
-    +'&body='+encodeURIComponent(body);
-  doMail();
+  /* same Gmail web-compose pattern shareCert() uses, so this works without a
+     desktop mail client; only mark the step done if the compose window actually opened */
+  const win=window.open('https://mail.google.com/mail/?view=cm&fs=1'
+    +'&to='+encodeURIComponent('bu.learning@betterup.co')
+    +'&su='+encodeURIComponent('Expand Your Range completed — enrol me in Running with Claude')
+    +'&body='+encodeURIComponent(body),'_blank');
+  if(win){doMail();advance(8,true); /* mark Enrol as checkpoint 8 cleared so the header counter reaches 8/8 and a correct "fully finished" state exists; silent=true because doMail() already added Enrol's XP (XP[8]=100), toasted, and logged the event — advance(8,true) here only needs to set S.cleared[8], flip s8's classes to .done, and re-run refresh()/save() */}
+  else{toast('Pop-up blocked — allow pop-ups for this site and click again',2);}
 });
 document.getElementById('applyGo').addEventListener('click',()=>{doApply();advance(5);});
-/* Log my reflection — records answers (blank is fine) then advances */
-document.querySelectorAll('#reflectPanel [data-next="7"]').forEach(b=>b.addEventListener('click',()=>doReflect()));
+/* Log my reflection — single handler, explicit save-then-advance (mirrors applyGo above) */
+document.getElementById('reflectGo').addEventListener('click',()=>{doReflect();advance(7);});
 
 document.getElementById('pCopy').addEventListener('click',async()=>{ping(500);
   try{await navigator.clipboard.writeText(document.getElementById('pTxt').textContent);
@@ -936,8 +1205,13 @@ document.getElementById('pCopy').addEventListener('click',async()=>{ping(500);
 
 /* ---------- chart ---------- */
 function parse(t){const o={};let hit=0;
-  const rx={EF:/\bEF\s*[:=]\s*([1-5])/i,R:/\bR\s*[:=]\s*([1-5])/i,A:/\bA\s*[:=]\s*([1-5])/i,
-            N:/\bN\s*[:=]\s*([1-5])/i,G:/\bG\s*[:=]\s*([1-5])/i};
+  /* trailing \b after the digit forces the number to end at a real boundary
+     (space, comma, newline, |, end-of-string, or any non-word char) — a digit
+     immediately followed by another digit/letter (e.g. "R:12", "R:2x") fails
+     the boundary check and the whole token is treated as unmatched, instead
+     of silently capturing just its first digit. */
+  const rx={EF:/\bEF\s*[:=]\s*([1-5])\b/i,R:/\bR\s*[:=]\s*([1-5])\b/i,A:/\bA\s*[:=]\s*([1-5])\b/i,
+            N:/\bN\s*[:=]\s*([1-5])\b/i,G:/\bG\s*[:=]\s*([1-5])\b/i};
   for(const k of ['EF','R','A','N','G']){const m=t.match(rx[k]);if(m){o[k]=+m[1];hit++;}}
   return hit===5?o:null;}
 function drawChart(v){
@@ -966,6 +1240,9 @@ document.getElementById('scoreGo').addEventListener('click',()=>{
   const raw=document.getElementById('scoreIn').value,v=parse(raw),e=document.getElementById('scoreErr');
   if(!v){e.style.display='block';ping(200);ev('range-parse-fail');return;}
   e.style.display='none';S.range=Object.assign({},v,{raw:raw.trim(),Total:v.R+v.A+v.N+v.G+v.EF});drawChart(v);
+  let paidElsewhere=false; /* a sibling tab may already have awarded/persisted this XP since this tab's own state hadn't caught up */
+  try{const prev=JSON.parse(localStorage.getItem(KEY)||'null');paidElsewhere=!!(prev&&prev.rangeXp);}catch(e){}
+  if(paidElsewhere)S.rangeXp=1;
   if(!S.rangeXp){addXp(100);S.rangeXp=1;} /* re-plotting (e.g. to see your shift later) shouldn't re-award XP every time */
   document.getElementById('scoreGo').textContent='Re-plot';
   ev('range-saved','',JSON.stringify(v));toast('Terrain mapped',2);save();
@@ -1025,16 +1302,59 @@ async function renderLeaderboard(){
     list.insertAdjacentHTML('beforeend',lbRowHtml(meRow));
   }
 }
-document.querySelectorAll('.lbBtn').forEach(b=>b.addEventListener('click',()=>{
-  renderLeaderboard();document.getElementById('lbDrawer').classList.add('open');ev('leaderboard-open');}));
-document.getElementById('lbClose').addEventListener('click',()=>
-  document.getElementById('lbDrawer').classList.remove('open'));
+/* ---------- shared drawer open/close helpers (Bug 20: mutual exclusion, Bug 21: a11y state, Bug 22: backdrop/Escape) ---------- */
+function setDrawerA11y(el,isOpen){
+  if(!el)return;
+  el.setAttribute('aria-hidden',isOpen?'false':'true');
+  if(isOpen)el.removeAttribute('inert');else el.setAttribute('inert','');
+}
+const drawerBackdrop=document.getElementById('drawerBackdrop');
+function setBackdrop(show){
+  if(!drawerBackdrop)return;
+  drawerBackdrop.classList.toggle('show',show);
+  drawerBackdrop.setAttribute('aria-hidden',show?'false':'true');
+  if(show)drawerBackdrop.removeAttribute('inert');else drawerBackdrop.setAttribute('inert','');
+}
+function closeLb(){
+  const d=document.getElementById('lbDrawer');
+  d.classList.remove('open');setDrawerA11y(d,false);setBackdrop(false);
+}
+function closeCoach(){
+  const d=document.getElementById('coachDrawer');
+  d.classList.remove('open');setDrawerA11y(d,false);setBackdrop(false);
+}
+function openLb(){
+  closeCoach(); /* only one slide-over may be open at a time */
+  renderLeaderboard();
+  const d=document.getElementById('lbDrawer');
+  d.classList.add('open');setDrawerA11y(d,true);setBackdrop(true);
+  ev('leaderboard-open');
+}
+function openCoach(){
+  closeLb(); /* only one slide-over may be open at a time */
+  const d=document.getElementById('coachDrawer');
+  d.classList.add('open');setDrawerA11y(d,true);setBackdrop(true);
+  ev('coach-open');
+}
+document.querySelectorAll('.lbBtn').forEach(b=>b.addEventListener('click',openLb));
+document.getElementById('lbClose').addEventListener('click',closeLb);
 
 /* ---------- AI coach (copy-and-open — no API key, no cost, same pattern as the RANGE evaluator) ---------- */
-document.querySelectorAll('.coachBtn').forEach(b=>b.addEventListener('click',()=>{
-  document.getElementById('coachDrawer').classList.add('open');ev('coach-open');}));
-document.getElementById('coachClose').addEventListener('click',()=>
-  document.getElementById('coachDrawer').classList.remove('open'));
+document.querySelectorAll('.coachBtn').forEach(b=>b.addEventListener('click',openCoach));
+document.getElementById('coachClose').addEventListener('click',closeCoach);
+
+/* Bug 22: Escape closes whichever drawer is open */
+document.addEventListener('keydown',(e)=>{
+  if(e.key!=='Escape')return;
+  if(document.getElementById('lbDrawer').classList.contains('open'))closeLb();
+  else if(document.getElementById('coachDrawer').classList.contains('open'))closeCoach();
+});
+
+/* Bug 22: clicking the backdrop (outside either panel) closes it */
+if(drawerBackdrop)drawerBackdrop.addEventListener('click',()=>{
+  if(document.getElementById('lbDrawer').classList.contains('open'))closeLb();
+  else if(document.getElementById('coachDrawer').classList.contains('open'))closeCoach();
+});
 document.getElementById('coachCopy').addEventListener('click',async()=>{
   const q=document.getElementById('coachQ').value.trim();
   if(!q){toast('Write your question first');return;}
@@ -1051,7 +1371,11 @@ document.getElementById('slackLink').addEventListener('click',e=>{e.preventDefau
 /* ---------- summit: log build (was unwired — button did nothing on click) ---------- */
 const logBuildBtn=document.querySelector('[data-ev="log-build"]');
 if(logBuildBtn)logBuildBtn.addEventListener('click',()=>{
-  ping(460);window.open('https://betterup.enterprise.slack.com/','_blank');
+  ping(460);
+  /* TODO(bug 24): opens the Slack workspace root, not the actual #ai-builds channel — needs the real #ai-builds channel ID
+     (format https://betterup.enterprise.slack.com/archives/<CHANNEL_ID>), e.g. via Slack's "Copy link" on the channel.
+     Do NOT reuse the SLACK constant above — that is the #peers channel (C0B1EV24VLY), a different channel. */
+  window.open('https://betterup.enterprise.slack.com/','_blank');
   toast('Opening Slack — post it in #ai-builds',2);ev('log-build-click');
 });
 
@@ -1063,12 +1387,20 @@ if(logBuildBtn)logBuildBtn.addEventListener('click',()=>{
     load();setXp();
     done=Object.keys(S.cleared).map(Number).filter(n=>n<=5).sort();
     const saved={...S.cleared};S.cleared={};
-    done.forEach(id=>advance(id,true));
-    /* stages 6 and 7 must also replay through advance() (not just set the flag) so it
+    done.forEach(id=>{
+      try{advance(id,true);}
+      catch(e){console.warn('EYR restore: skipping checkpoint',id,'— stale/mismatched value threw:',e);}
+    }); /* one bad/stale cleared-id no longer aborts the remaining ids or everything after this loop */
+    if(done.includes(1)){const b1=document.querySelector('[data-next="1"]');if(b1)b1.disabled=false;} /* already cleared the video gate before — don't re-lock it behind a fresh 90%-watch requirement on reload */
+    /* stages 6, 7 and 8 must also replay through advance() (not just set the flag) so each
        unlocks the stage after it — otherwise s7/s8 stay .locked forever after any refresh */
-    if(saved[6])advance(6,true);
-    if(saved[7])advance(7,true);
-    Object.keys(S.courses).forEach(k=>markCourse(k,true));
+    if(saved[6]){try{advance(6,true);}catch(e){console.warn('EYR restore: skipping checkpoint 6 — stale/mismatched value threw:',e);}}
+    if(saved[7]){try{advance(7,true);}catch(e){console.warn('EYR restore: skipping checkpoint 7 — stale/mismatched value threw:',e);}}
+    if(saved[8]||S.mailed){try{advance(8,true);}catch(e){console.warn('EYR restore: skipping checkpoint 8 — stale/mismatched value threw:',e);}} /* `||S.mailed` backfills users who clicked Enrol under the old buggy build, where S.mailed was set but S.cleared[8] never was — without this they'd be stuck showing 7/8 forever with a disabled Enrol button they can't re-click */
+    Object.keys(S.courses).forEach(k=>{
+      try{markCourse(k,true);}
+      catch(e){console.warn('EYR restore: skipping course',k,'— stale/mismatched S.courses value threw:',e);}
+    }); /* one bad/stale course id no longer aborts S.range/S.fields/doApply/doReflect/doMail restore below */
     if(S.range){drawChart(S.range);
       /* restore the plotted-state UI too: repopulate the score line and relabel the
          button, so a reload doesn't show an empty box + "Plot my terrain" that
@@ -1083,7 +1415,7 @@ if(logBuildBtn)logBuildBtn.addEventListener('click',()=>{
   }catch(e){console.error('EYR restore hit an error, continuing with whatever state was recovered:',e);}
   RESTORING=false; /* always re-armed, even if the block above threw, so later real actions still sync to the backend */
   /* open the first unfinished stage */
-  const clearedCount=[1,2,3,4,5,6,7].filter(id=>S.cleared[id]).length;
+  const clearedCount=[1,2,3,4,5,6,7,8].filter(id=>S.cleared[id]).length;
   const next=Math.min(clearedCount+1,8);
   document.querySelectorAll('.stage').forEach(s=>s.classList.remove('open'));
   const el=document.getElementById('s'+next);if(el&&!el.classList.contains('locked'))el.classList.add('open');
@@ -1091,6 +1423,7 @@ if(logBuildBtn)logBuildBtn.addEventListener('click',()=>{
   ev('session-start','',done.length?'resumed at '+next:'first visit');
   if(done.length)toast('Welcome back — checkpoint '+Math.min(done.length,5),2);
 })();
+}); /* end whoAmI().then — nothing above this line ever ran until a valid @betterup.co identity was confirmed */
 </script>
 </body>
 </html>
