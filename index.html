@@ -1401,6 +1401,14 @@ if(logBuildBtn)logBuildBtn.addEventListener('click',()=>{
       try{markCourse(k,true);}
       catch(e){console.warn('EYR restore: skipping course',k,'— stale/mismatched S.courses value threw:',e);}
     }); /* one bad/stale course id no longer aborts S.range/S.fields/doApply/doReflect/doMail restore below */
+    ['c1','c2','c3'].forEach(k=>{
+      try{enableCleared(k);}
+      catch(e){console.warn('EYR restore: skipping opened-state replay for',k,'—',e);}
+    }); /* Bug 26: S.opened[k] (set by the c1open/c2open/c3open click listeners) was never replayed
+           on reload — a course that was opened but not yet marked done fell back to the hardcoded
+           disabled="" in the markup, even though S.opened[k] was correctly saved. enableCleared()
+           already no-ops on an already-cleared course (S.courses[k] check), so this is safe to
+           call unconditionally here. */
     if(S.range){drawChart(S.range);
       /* restore the plotted-state UI too: repopulate the score line and relabel the
          button, so a reload doesn't show an empty box + "Plot my terrain" that
